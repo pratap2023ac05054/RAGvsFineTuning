@@ -1,0 +1,50 @@
+{"question":"What is EBITDA?","answer":"Earnings before interest, taxes, depreciation, and amortization."}
+{"question":"What is EPS?","answer":"Net income divided by weighted-average shares outstanding."}
+{"question":"Which financial statement shows a company’s liquidity position at a point in time?","answer":"The balance sheet."}
+{"question":"What does gross margin measure?","answer":"Revenue minus cost of goods sold as a percentage of revenue."}
+{"question":"What is the formula for operating margin?","answer":"Operating income divided by revenue."}
+{"question":"What is free cash flow (FCF)?","answer":"Operating cash flow minus capital expenditures."}
+{"question":"What is working capital?","answer":"Current assets minus current liabilities."}
+{"question":"What is the current ratio?","answer":"Current assets divided by current liabilities."}
+{"question":"What is the quick ratio?","answer":"(Current assets minus inventory) divided by current liabilities."}
+{"question":"What is goodwill?","answer":"The purchase premium over the fair value of net identifiable assets."}
+{"question":"What is amortization?","answer":"Systematic expense of intangible asset cost over time."}
+{"question":"What is depreciation?","answer":"Systematic allocation of a tangible asset’s cost over its useful life."}
+{"question":"What is CAPEX?","answer":"Capital expenditures for property, plant, and equipment."}
+{"question":"What is OPEX?","answer":"Operating expenses incurred in the normal course of business."}
+{"question":"What is the revenue recognition principle?","answer":"Recognize revenue when control of goods or services transfers to the customer."}
+{"question":"What is deferred revenue?","answer":"Cash received for goods or services not yet delivered or performed."}
+{"question":"What do accounts receivable represent?","answer":"Amounts owed by customers for credit sales."}
+{"question":"What do accounts payable represent?","answer":"Amounts owed to suppliers and vendors."}
+{"question":"What is net income?","answer":"Profit after all expenses and taxes."}
+{"question":"What is operating income?","answer":"Profit from core operations excluding interest and taxes."}
+{"question":"What is gross profit?","answer":"Revenue minus cost of goods sold."}
+{"question":"What is COGS?","answer":"Direct costs to produce goods sold."}
+{"question":"What is SG&A?","answer":"Selling, general, and administrative expenses."}
+{"question":"What is R&D expense?","answer":"Spending on research and development activities."}
+{"question":"What is the cash conversion cycle?","answer":"Days sales outstanding plus days inventory outstanding minus days payables outstanding."}
+{"question":"What does DSO stand for?","answer":"Days sales outstanding."}
+{"question":"What does DIO stand for?","answer":"Days inventory outstanding."}
+{"question":"What does DPO stand for?","answer":"Days payables outstanding."}
+{"question":"Which SEC filing is the annual report for U.S. public companies?","answer":"Form 10-K."}
+{"question":"Which SEC filing is the quarterly report for U.S. public companies?","answer":"Form 10-Q."}
+{"question":"Which SEC filing reports material current events?","answer":"Form 8-K."}
+{"question":"What is guidance in earnings reports?","answer":"Management’s forward-looking projections."}
+{"question":"What is a fiscal year?","answer":"A 12-month accounting period not necessarily aligned with the calendar year."}
+{"question":"What is diluted EPS?","answer":"Earnings per share including the effect of dilutive securities."}
+{"question":"What is treasury stock?","answer":"Company shares that have been repurchased and are held by the company."}
+{"question":"What is a share buyback?","answer":"A company repurchases its own shares from the market."}
+{"question":"What is the dividend yield formula?","answer":"Annual dividend per share divided by share price."}
+{"question":"What is the P/E ratio formula?","answer":"Share price divided by earnings per share."}
+{"question":"What is enterprise value (EV)?","answer":"Market capitalization plus total debt minus cash and cash equivalents."}
+{"question":"What does EV/EBITDA measure?","answer":"Enterprise value relative to operating earnings."}
+{"question":"What is the Debt/EBITDA leverage ratio?","answer":"Total debt divided by EBITDA."}
+{"question":"What does year-over-year (YoY) growth mean?","answer":"Change compared to the same period in the prior year."}
+{"question":"What is sequential growth?","answer":"Change compared to the immediately preceding period."}
+{"question":"What is segment reporting?","answer":"Disclosure of results by business or geographic segments."}
+{"question":"What is foreign exchange (FX) impact?","answer":"The effect of currency movements on reported results."}
+{"question":"What is constant-currency reporting?","answer":"Metrics adjusted to exclude the effects of FX changes."}
+{"question":"If revenue is 100 and COGS is 60, what is gross margin percent?","answer":"40%."}
+{"question":"If operating income is 25 on revenue of 100, what is operating margin?","answer":"25%."}
+{"question":"If operating cash flow is 80 and CAPEX is 20, what is free cash flow?","answer":"60."}
+{"question":"If current assets are 150 and current liabilities are 100, what is the current ratio?","answer":"1.5."}
