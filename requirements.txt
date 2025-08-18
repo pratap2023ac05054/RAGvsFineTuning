@@ -1,0 +1,8 @@
+pdfplumber
+scikit-learn
+rank_bm25
+transformers
+streamlit
+torch
+datasets
+peft
