@@ -428,7 +428,6 @@ def _st_main():
     # Smaller button (no full-width)
     ask = st.button("Ask")  # intentionally not use_container_width
 
-    st.caption("Tip: In RAG mode, artifacts should be next to src/rag_mod.py.")
 
     if not ask:
         return
