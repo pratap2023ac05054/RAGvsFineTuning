@@ -401,35 +401,33 @@ def _st_main():
     with st.sidebar:
         st.header("Settings")
         mode = st.radio("Mode", ["RAG", "Fine-Tuned"], index=0)
-        use_gen_in_rag = st.checkbox("Use generative synthesis (RAG)", value=True)
-        st.caption("Env:")
-        st.code(
-            f"USE_GPU={os.environ.get('USE_GPU','0')}\n"
-            f"GEN_MODEL={os.environ.get('GEN_MODEL','distilgpt2')}\n"
-            f"FINETUNED_MODEL={os.environ.get('FINETUNED_MODEL', str(SRC_DIR / 'finetuning'))}\n"
-            f"BASE_MODEL={os.environ.get('BASE_MODEL','gpt2')}\n"
-            f"FT_MAX_NEW={os.environ.get('FT_MAX_NEW','128')}",
-            language="bash",
-        )
-
-        # Show resolved model (helpful for debugging local folders)
-        st.caption("Resolved model path under src/finetuning (if any):")
-        try:
-            p = Path(os.environ.get("FINETUNED_MODEL", "").strip() or (SRC_DIR / "finetuning"))
-            found, kind = _scan_for_model_or_adapter(p, max_depth=2)
-            if found is not None:
-                st.code(f"{found}  [{kind}]", language="bash")
-            else:
-                st.code("(none found — will treat FINETUNED_MODEL as HF Hub ID if provided)", language="bash")
-        except Exception:
-            st.code("(resolution failed)", language="bash")
-
-        # Show compute setup
-        st.caption("Compute setup:")
-        st.code(get_compute_label(), language="bash")
+       
 
     query = st.text_input("Enter your query", placeholder="Ask a question…")
-    ask = st.button("Ask", type="primary", use_container_width=True)
+
+    # ---- custom CSS for the main "Ask" button (smaller + color #170f5f) ----
+    st.markdown(
+        """
+        <style>
+        div.stButton > button:first-child {
+            background-color: #170f5f;
+            color: white;
+            padding: 10px 20px;   /* smaller height & width */
+            font-size: 8px;          /* smaller text */
+            border-radius: 6px;
+        }
+        div.stButton > button:first-child:hover {
+            background-color: #2a1b8d;   /* subtle hover shade */
+            color: white;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # Smaller button (no full-width)
+    ask = st.button("Ask")  # intentionally not use_container_width
+
     st.caption("Tip: In RAG mode, artifacts should be next to src/rag_mod.py.")
 
     if not ask:
@@ -440,7 +438,7 @@ def _st_main():
 
     if mode == "RAG":
         with st.spinner("Running RAG…"):
-            answer, score, method, seconds, contexts = answer_with_rag(query, use_gen_in_rag)
+            answer, score, method, seconds, contexts = answer_with_rag(query, True)
             confidence = score
     else:
         with st.spinner("Running Fine-Tuned model…"):
