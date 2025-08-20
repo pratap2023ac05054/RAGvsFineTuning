@@ -1,0 +1,114 @@
+Loading dataset from: qapairs/medtronic_qa_training_data.json
+Dataset split: 40 training samples, 10 test samples.
+
+==================================================
+  BENCHMARKING: Pre-trained Zephyr-7B-Beta
+==================================================
+
+--- Test Question 1 ---
+Q: What were the net sales for the Cranial & Spinal Technologies division in fiscal year 2024?
+Input Guardrail: PASSED
+Expected A: The Cranial & Spinal Technologies division had net sales of $4.756 billion in fiscal year 2024.
+Generated A: I do not have access to real-time financial data or future projections. The question asks about fiscal year 2024, which is in the future. Please provide a different question or specify a different timeframe for which you are requesting net sales information.
+Inference Speed: 57.3818 seconds
+Output Guardrail: ⚠️ FLAGGED - Reason: Low Grounding Score
+   Details: The answer is not well-supported by the context. Coverage score: 0.26 (Threshold: 0.35)
+
+--- Test Question 2 ---
+Q: What were the net sales for U.S. operations in fiscal year 2025?
+Input Guardrail: PASSED
+Expected A: In fiscal year 2025, Medtronic's total net sales in the U.S. were $17.171 billion.
+Generated A: I do not have access to real-time financial data or future predictions. The net sales for us operations in fiscal year 2025 are unknown and can only be speculated based on various factors and assumptions. It is best to refer to the company's official financial reports or contact their investor relations department for accurate and up-to-date information.
+Inference Speed: 77.1797 seconds
+Output Guardrail: ⚠️ FLAGGED - Reason: Low Grounding Score
+   Details: The answer is not well-supported by the context. Coverage score: 0.17 (Threshold: 0.35)
+
+--- Test Question 3 ---
+Q: What was the total amount of cash and cash equivalents for Medtronic at the end of fiscal year 2025?
+Input Guardrail: PASSED
+Expected A: At the end of fiscal year 2025, Medtronic had $2.218 billion in cash and cash equivalents.
+Generated A: I do not have access to real-time financial data or future projections. Please provide the specific year for which you are asking about medtronic's cash and cash equivalents. If you are asking about medtronic's most recent fiscal year, which ended on april 25, 2021, the company's annual report for that year shows that medtronic had total cash and cash equivalents of us$ 6.7 billion as of april
+Inference Speed: 93.8918 seconds
+Output Guardrail: ⚠️ FLAGGED - Reason: Low Grounding Score
+   Details: The answer is not well-supported by the context. Coverage score: 0.23 (Threshold: 0.35)
+
+--- Test Question 4 ---
+Q: What is the primary use of the TYRX Absorbable Antibacterial Envelope?
+Input Guardrail: PASSED
+Expected A: The TYRX Absorbable Antibacterial Envelope is designed to stabilize electronic implantable devices like pacemakers and defibrillators and help prevent infection.
+Generated A: The primary use of the TYRX Absorbable Anturbacterial Envelope is to reduce the risk of surgical site infections (SSIs) in patients undergoing certain types of implant surgeries, such as cardiac, orthopedic, and vascular procedures. The envelope is placed around the implant during surgery and gradually dissolves over time, releasing antibiotics to prevent bacterial colonization and infection. This technology helps to improve patient outcomes by reducing the need
+Inference Speed: 95.0469 seconds
+Output Guardrail: ⚠️ FLAGGED - Reason: Low Grounding Score
+   Details: The answer is not well-supported by the context. Coverage score: 0.12 (Threshold: 0.35)
+
+--- Test Question 5 ---
+Q: What was the organic revenue growth for Medtronic in fiscal year 2024?
+Input Guardrail: PASSED
+Expected A: In fiscal year 2024, Medtronic's organic revenue growth was 5.2%.
+Generated A: I do not have access to real-time financial data. Please provide the specific year you are referring to. If you are asking about medtronic's organic revenue growth in fiscal year 2024, I'm sorry to inform you that as of my training data, which goes up until 2021, medtronic has not yet released its financial results for fiscal year 2024. You may want to check their official website or contact their investor
+Inference Speed: 92.8522 seconds
+Output Guardrail: ⚠️ FLAGGED - Reason: Low Grounding Score
+   Details: The answer is not well-supported by the context. Coverage score: 0.23 (Threshold: 0.35)
+
+--- Test Question 6 ---
+Q: What was the total amount of long-term debt for Medtronic as of April 25, 2025?
+Input Guardrail: PASSED
+Expected A: As of April 25, 2025, Medtronic's long-term debt was $25.642 billion.
+Generated A: I do not have access to real-time financial data. Please provide the year for which you are asking about medtronic's long-term debt. Based on the given date, april 25, 2025, is in the future, and I am unable to provide the exact amount of medtronic's long-term debt at that time. You may want to check medtronic's financial reports or contact the company directly for the most up-to
+Inference Speed: 98.1644 seconds
+Output Guardrail: ⚠️ FLAGGED - Reason: Low Grounding Score
+   Details: The answer is not well-supported by the context. Coverage score: 0.19 (Threshold: 0.35)
+
+--- Test Question 7 ---
+Q: Which Medtronic product is described as a leadless transcatheter pacing system?
+Input Guardrail: PASSED
+Expected A: The Micra transcatheter pacing system is Medtronic's leadless pacing system.
+Generated A: The Medtronic product described as a leadless transcatheter pacing system is called the Micra™ Transcatheter Pacing System. It is a small, self-contained device that is implanted directly into the heart without the need for leads or wires, making it a less invasive alternative to traditional pacemakers. The Micra™ system is designed to treat bradycardia, a condition characterized by abnormally slow heart rhythms.
+Inference Speed: 92.6657 seconds
+Output Guardrail: ⚠️ FLAGGED - Reason: Low Grounding Score
+   Details: The answer is not well-supported by the context. Coverage score: 0.16 (Threshold: 0.35)
+
+--- Test Question 8 ---
+Q: What was Medtronic's net interest expense in fiscal year 2025?
+Input Guardrail: PASSED
+Expected A: In fiscal year 2025, Medtronic's net interest expense was $729 million.
+Generated A: I do not have access to future financial information. Medtronic's net interest expense for fiscal year 2025 is not available as the company's financial results for that year have not been reported yet. You can check their financial reports or contact the company directly for more information once the fiscal year 2025 results are released.
+Inference Speed: 71.9824 seconds
+Output Guardrail: ⚠️ FLAGGED - Reason: Low Grounding Score
+   Details: The answer is not well-supported by the context. Coverage score: 0.33 (Threshold: 0.35)
+
+--- Test Question 9 ---
+Q: What was the value of Medtronic's goodwill as of April 25, 2025?
+Input Guardrail: PASSED
+Expected A: As of April 25, 2025, Medtronic's goodwill was valued at $41.737 billion.
+Generated A: I do not have access to real-time financial data. Medtronic's goodwill value as of april 25, 2025, can only be determined by referring to their financial statements released on that date. You may visit medtronic's investor relations website or consult a financial database to find the exact value of their goodwill as of that date.
+Inference Speed: 74.1822 seconds
+Output Guardrail: ⚠️ FLAGGED - Reason: Low Grounding Score
+   Details: The answer is not well-supported by the context. Coverage score: 0.22 (Threshold: 0.35)
+
+--- Test Question 10 ---
+Q: What is the GI Genius intelligent endoscopy module?
+Input Guardrail: PASSED
+Expected A: The GI Genius intelligent endoscopy module is an AI-powered system used to augment traditional colon cancer screenings by helping to find minuscule, hard-to-detect polyps.
+Generated A: The GI Genius intelligent endoscopy module is a technology developed by Medtronic that uses artificial intelligence (AI) and machine learning algorithms to assist gastroenterologists in the detection and characterization of early-stage gastrointestinal cancers and precancerous lesions during endoscopy procedures. The system analyzes images and videos in real-time, highlighting areas of interest and providing a confidence score for the presence of cancer or precancerous lesions. This technology
+Inference Speed: 92.2907 seconds
+Output Guardrail: ⚠️ FLAGGED - Reason: Low Grounding Score
+   Details: The answer is not well-supported by the context. Coverage score: 0.19 (Threshold: 0.35)
+
+--- Benchmark Summary ---
+Average Inference Speed: 84.5638 seconds
+==================================================
+
+
+==================================================
+  STARTING FINE-TUNING PROCESS
+==================================================
+Compute Setup: CPU
+Learning Rate: 2e-05
+Batch Size: 1
+Number of Epochs: 3
+Warning: Running on CPU. Training will be very slow.
+
+Trainable Parameters:
+
+Starting training...
