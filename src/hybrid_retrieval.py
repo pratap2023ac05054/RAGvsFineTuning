@@ -5,14 +5,21 @@ import time
 import json
 import subprocess
 import sys
-# Ensure numpy is installed
+
+# The faiss-cpu library has a hard dependency on NumPy.
+# We import it only where needed to interact with the faiss index.
 try:
-    import numpy as np
+    import faiss
 except ImportError:
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "numpy"])
-    import numpy as np
-import faiss
-from sentence_transformers import SentenceTransformer
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "faiss-cpu"])
+    import faiss
+
+try:
+    from sentence_transformers import SentenceTransformer
+except ImportError:
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "sentence-transformers"])
+    from sentence_transformers import SentenceTransformer
+
 import nltk
 from response_generator import ResponseGenerator
 
@@ -62,14 +69,21 @@ def retrieve(query: str, embed_model, faiss_index, bm25_index, chunk_data):
     """Performs the full hybrid retrieval pipeline."""
     preprocessed_query, bm25_tokens = preprocess_query(query)
     print(f"Preprocessed Query: '{preprocessed_query}'")
-
+    
+    # NumPy is required by the faiss-cpu library to correctly format the input vector.
+    import numpy as np
     query_embedding = embed_model.encode([preprocessed_query]).astype(np.float32)
 
     _, dense_indices = faiss_index.search(query_embedding, k=TOP_N)
     dense_retrieved_ids = dense_indices[0].tolist()
 
     bm25_scores = bm25_index.get_scores(bm25_tokens)
-    sparse_retrieved_ids = np.argsort(bm25_scores)[::-1][:TOP_N].tolist()
+    
+    # REPLACEMENT FOR np.argsort: Use Python's sorted() with enumerate
+    # to get the indices of the top N scores in descending order.
+    sparse_retrieved_ids = [
+        item[0] for item in sorted(enumerate(bm25_scores), key=lambda x: x[1], reverse=True)
+    ][:TOP_N]
 
     print(f"Dense Retriever found IDs: {dense_retrieved_ids}")
     print(f"Sparse Retriever found IDs: {sparse_retrieved_ids}")
