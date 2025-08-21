@@ -1,0 +1,158 @@
+Loading dataset from: qapairs/medtronic_qa_training_data.json
+Using all 50 samples for training.
+Using the first 10 samples for benchmarking (note: this is a subset of the training data).
+
+==================================================
+  BENCHMARKING: Pre-trained gpt2-medium
+==================================================
+
+--- Test Question 1 ---
+Q: What were Medtronic's total net sales for the fiscal year ended April 25, 2025?
+Expected A: For the fiscal year ended April 25, 2025, Medtronic's total net sales were $33.537 billion.
+Generated A: $1.2 billion.
+Inference Speed: 5.5775 seconds
+
+--- Test Question 2 ---
+Q: What were Medtronic's total net sales for the fiscal year ended April 26, 2024?
+Expected A: For the fiscal year ended April 26, 2024, Medtronic's total net sales were $32.364 billion.
+Generated A: $1.2 billion.
+Inference Speed: 5.3761 seconds
+
+--- Test Question 3 ---
+Q: What was the GAAP diluted earnings per share (EPS) for Medtronic in fiscal year 2025?
+Expected A: In fiscal year 2025, Medtronic's GAAP diluted earnings per share (EPS) was $3.61.
+Generated A: MedTronic's EBITDA for fiscal years 2017 and 2018 was $1.2 billion, and for the fiscal quarter ending June 30, 2018, it was approximately $2.1 billion.
+Inference Speed: 5.3337 seconds
+
+--- Test Question 4 ---
+Q: What was the GAAP diluted earnings per share (EPS) for Medtronic in fiscal year 2024?
+Expected A: In fiscal year 2024, Medtronic's GAAP diluted earnings per share (EPS) was $2.76.
+Generated A: MedTronic's diluted EPS for fiscal years 2024 and 2025 was $0.00.
+Inference Speed: 5.3822 seconds
+
+--- Test Question 5 ---
+Q: How much did Medtronic spend on Research and Development in fiscal year 2025?
+Expected A: Medtronic's research and development expense for fiscal year 2025 was $2.732 billion.
+Generated A: $1.2 billion.
+Inference Speed: 5.3580 seconds
+
+--- Test Question 6 ---
+Q: What were the net sales for the Cardiovascular Portfolio in fiscal year 2025?
+Expected A: The Cardiovascular Portfolio had net sales of $12.481 billion in fiscal year 2025.
+Generated A: The Cardiology Portfolios sold $1.2 billion in total, with $2.1 billion of that coming from the U.S. and $3.4 billion from Canada.
+Inference Speed: 4.8324 seconds
+
+--- Test Question 7 ---
+Q: What were the net sales for the Neuroscience Portfolio in fiscal year 2025?
+Expected A: The Neuroscience Portfolio had net sales of $9.846 billion in fiscal year 2025.
+Generated A: The Neuroscience portfolio was sold to a private equity firm in January of 2015. The portfolio is now owned by a group of investors.
+Inference Speed: 5.6773 seconds
+
+--- Test Question 8 ---
+Q: What were the net sales for the Medical Surgical Portfolio in fiscal year 2025?
+Expected A: The Medical Surgical Portfolio had net sales of $8.407 billion in fiscal year 2025.
+Generated A: The Medical Portfolios were sold to the public in the form of a series of stock options. The options were issued in January of each year, and the options are exercisable at any time during the year.
+Inference Speed: 5.6798 seconds
+
+--- Test Question 9 ---
+Q: What were the net sales for the Diabetes Operating Unit in fiscal year 2025?
+Expected A: The Diabetes Operating Unit had net sales of $2.755 billion in fiscal year 2025.
+Generated A: The operating unit's net revenue was $1.1 billion, up from $972 million in the prior year. The unit sold $2.2 billion of branded products, including $8.4 billion in branded insulin, $3.6 billion for branded oral medications, and $4.3 billion to specialty drug manufacturers.
+Inference Speed: 5.5109 seconds
+
+--- Test Question 10 ---
+Q: How many full-time employees did Medtronic have as of the 2025 report?
+Expected A: As of the 2025 report, Medtronic has over 95,000 full-time employees.
+Generated A: MedTronic had approximately 1,000 full time employees as at the end of fiscal year 2025.
+Inference Speed: 5.5252 seconds
+
+--- Benchmark Summary ---
+Average Inference Speed: 5.4253 seconds
+Note: Accuracy and confidence are qualitative. Please review the generated vs. expected answers.
+==================================================
+
+
+==================================================
+  STARTING FINE-TUNING PROCESS
+==================================================
+Compute Setup: CPU
+Model: gpt2-medium
+Learning Rate: 5e-05
+Batch Size: 4
+Number of Epochs: 3
+
+Trainable Parameters:
+
+Starting training...
+Saving fine-tuned model to ./gpt2-medium-finetuned
+Fine-tuning complete!
+
+==================================================
+  BENCHMARKING: Fine-Tuned gpt2-medium with LoRA
+==================================================
+
+--- Test Question 1 ---
+Q: What were Medtronic's total net sales for the fiscal year ended April 25, 2025?
+Expected A: For the fiscal year ended April 25, 2025, Medtronic's total net sales were $33.537 billion.
+Generated A: MedTronic reported total sales of $1.8 billion for fiscal years 2025 and 2026.
+Inference Speed: 3.7878 seconds
+
+--- Test Question 2 ---
+Q: What were Medtronic's total net sales for the fiscal year ended April 26, 2024?
+Expected A: For the fiscal year ended April 26, 2024, Medtronic's total net sales were $32.364 billion.
+Generated A: MedTronic had total sales of $1.8 billion for fiscal years 2024 and 2025.
+Inference Speed: 4.0474 seconds
+
+--- Test Question 3 ---
+Q: What was the GAAP diluted earnings per share (EPS) for Medtronic in fiscal year 2025?
+Expected A: In fiscal year 2025, Medtronic's GAAP diluted earnings per share (EPS) was $3.61.
+Generated A: MedTronic's diluted EPS for fiscal years 2025 and 2026 was $0.00.
+Inference Speed: 6.0722 seconds
+
+--- Test Question 4 ---
+Q: What was the GAAP diluted earnings per share (EPS) for Medtronic in fiscal year 2024?
+Expected A: In fiscal year 2024, Medtronic's GAAP diluted earnings per share (EPS) was $2.76.
+Generated A: MedTronic's diluted EPS for fiscal years 2024 and 2025 was $0.00.
+Inference Speed: 6.1429 seconds
+
+--- Test Question 5 ---
+Q: How much did Medtronic spend on Research and Development in fiscal year 2025?
+Expected A: Medtronic's research and development expense for fiscal year 2025 was $2.732 billion.
+Generated A: MedTronic spent $1.1 billion on research and development in FY 2025.
+Inference Speed: 6.1866 seconds
+
+--- Test Question 6 ---
+Q: What were the net sales for the Cardiovascular Portfolio in fiscal year 2025?
+Expected A: The Cardiovascular Portfolio had net sales of $12.481 billion in fiscal year 2025.
+Generated A: The Cardiology Portfolios sold $1.2 billion in net revenue in 2025.
+Inference Speed: 4.2556 seconds
+
+--- Test Question 7 ---
+Q: What were the net sales for the Neuroscience Portfolio in fiscal year 2025?
+Expected A: The Neuroscience Portfolio had net sales of $9.846 billion in fiscal year 2025.
+Generated A: The Neuroscience portfolio was sold to a private equity firm in January of 2015. The portfolio is now owned by a group of investors.
+Inference Speed: 6.2241 seconds
+
+--- Test Question 8 ---
+Q: What were the net sales for the Medical Surgical Portfolio in fiscal year 2025?
+Expected A: The Medical Surgical Portfolio had net sales of $8.407 billion in fiscal year 2025.
+Generated A: The Medical Portfolios were sold to the public in the year 2024.
+Inference Speed: 4.8926 seconds
+
+--- Test Question 9 ---
+Q: What were the net sales for the Diabetes Operating Unit in fiscal year 2025?
+Expected A: The Diabetes Operating Unit had net sales of $2.755 billion in fiscal year 2025.
+Generated A: The Diabetes operating unit sold $1.2 billion in net revenue in FY 2025.
+Inference Speed: 6.2279 seconds
+
+--- Test Question 10 ---
+Q: How many full-time employees did Medtronic have as of the 2025 report?
+Expected A: As of the 2025 report, Medtronic has over 95,000 full-time employees.
+Generated A: MedTronic had approximately 1,000 full time employees as at the end of 2025.
+Inference Speed: 6.2264 seconds
+
+--- Benchmark Summary ---
+Average Inference Speed: 5.4063 seconds
+Note: Accuracy and confidence are qualitative. Please review the generated vs. expected answers.
+==================================================
+

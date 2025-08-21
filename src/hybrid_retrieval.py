@@ -1,26 +1,22 @@
-# hybrid_retrieval.py
-
 import argparse
 import pickle
-import re
 import string
+import time
+import json
 import numpy as np
 import faiss
 from sentence_transformers import SentenceTransformer
 import nltk
-
-# Import the new components
 from response_generator import ResponseGenerator
-from guardrails import validate_query, validate_response
 
-# --- NLTK Data Download ---
+# --- NLTK Data Download Logic ---
 try:
     nltk.data.find('tokenizers/punkt')
     nltk.data.find('corpora/stopwords')
 except LookupError:
     print("Downloading NLTK data packages...")
-    nltk.download('punkt', quiet=False)
-    nltk.download('stopwords', quiet=False)
+    nltk.download('punkt', quiet=True)
+    nltk.download('stopwords', quiet=True)
 
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
@@ -58,7 +54,7 @@ def reciprocal_rank_fusion(retrieved_lists: list[list[int]], k: int = RRF_K) -> 
 def retrieve(query: str, embed_model, faiss_index, bm25_index, chunk_data):
     """Performs the full hybrid retrieval pipeline."""
     preprocessed_query, bm25_tokens = preprocess_query(query)
-    print(f"Preprocessed Query: '{preprocessed_query}'\n")
+    print(f"Preprocessed Query: '{preprocessed_query}'")
 
     query_embedding = embed_model.encode([preprocessed_query]).astype(np.float32)
 
@@ -79,16 +75,13 @@ def retrieve(query: str, embed_model, faiss_index, bm25_index, chunk_data):
     return final_results
 
 def main():
-    """Main function to load indices and run the full RAG pipeline."""
-    parser = argparse.ArgumentParser(description="Full RAG Pipeline with Guardrails")
+    """Main function to load indices and run the full RAG pipeline for the UI."""
+    parser = argparse.ArgumentParser(description="Full RAG Pipeline")
     parser.add_argument("--query", type=str, required=True, help="Your question")
+    parser.add_argument("--mode", type=str, choices=["RAG", "Fine-Tuned"], required=True, help="The mode of operation.")
     args = parser.parse_args()
 
-    # --- Step 1: Input Guardrail ---
-    is_valid, message = validate_query(args.query)
-    if not is_valid:
-        print(f"Input Error: {message}")
-        return
+    start_time = time.time()
 
     # Load retrieval components
     print("Loading retrieval indices and data...")
@@ -100,37 +93,36 @@ def main():
         with open(CHUNK_DATA_PATH, 'rb') as f:
             chunk_data = pickle.load(f)
     except FileNotFoundError:
-        print("Error: Index files not found. Please run 'build_indices.py' first.")
+        print(json.dumps({"error": "Index files not found. Please run 'build_indices.py' first."}))
         return
 
     # Initialize the Response Generator
     generator = ResponseGenerator()
 
-    # --- Step 2: Retrieve relevant chunks ---
+    # Retrieve relevant chunks
     retrieved_chunks = retrieve(args.query, embed_model, faiss_index, bm25_index, chunk_data)
 
-    # --- Step 3: Generate the final answer ---
+    # Generate the final answer
     print("Generating final answer...")
     final_answer = generator.generate(args.query, retrieved_chunks)
+    
+    end_time = time.time()
+    response_time = end_time - start_time
+    
+    # Use the highest score from the retrieved chunks as the confidence score
+    confidence_score = 0
+    if retrieved_chunks:
+        confidence_score = retrieved_chunks[0].get("score", 0)
 
-    # --- Step 4: Output Guardrail ---
-    context_texts = [chunk['text'] for chunk in retrieved_chunks[:5]] # Use top 5 for validation
-    validation_result = validate_response(final_answer, context_texts)
 
-    print("\n" + "="*50)
-    print("                 FINAL GENERATED ANSWER")
-    print("="*50 + "\n")
-    print(final_answer)
-    print("\n" + "="*50)
-    print("                 GUARDRAIL VALIDATION")
-    print("="*50 + "\n")
-    if validation_result["pass"]:
-        print("✅ Status: PASSED")
-    else:
-        print("⚠️ Status: FLAGGED")
-        print(f"   Reason: {validation_result['reason']}")
-        print(f"   Details: {validation_result.get('details', 'N/A')}")
-
+    # Prepare and Print Results as JSON for the Streamlit app
+    results = {
+        "answer": final_answer,
+        "confidence_score": confidence_score,
+        "method_used": args.mode,
+        "response_time": response_time
+    }
+    print(json.dumps(results))
 
 if __name__ == "__main__":
     main()

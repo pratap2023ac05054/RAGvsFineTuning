@@ -14,3 +14,7 @@ nltk
 numpy
 scikit-learn
 streamlit
+huggingface_hub
+ctransformers
+python-dotenv
+pyarrow 

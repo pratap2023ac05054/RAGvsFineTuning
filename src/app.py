@@ -1,173 +1,72 @@
-# app.py
-
 import streamlit as st
+import subprocess
+import json
 import time
-import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
-from sentence_transformers import SentenceTransformer
-import faiss
-import pickle
-import os
-from peft import PeftModel
 
-# Import the components from your other files
-from response_generator import ResponseGenerator
-from guardrails import validate_query, validate_response
-from hybrid_retrieval import retrieve 
+# --- Page Configuration ---
+st.set_page_config(
+    page_title="Query Interface",
+    page_icon="🤖",
+    layout="wide"
+)
 
-# --- Configuration ---
-FAISS_INDEX_PATH = "faiss_index.bin"
-BM25_INDEX_PATH = "bm25_index.pkl"
-CHUNK_DATA_PATH = "chunk_data.pkl"
-EMBED_MODEL_NAME = "all-MiniLM-L6-v2"
-RAG_GENERATOR_MODEL = "HuggingFaceH4/zephyr-7b-beta"
-FINETUNED_BASE_MODEL = "distilgpt2" # The base model used for fine-tuning
-FINETUNED_ADAPTER_DIR = "./distilgpt2-finetuned-fast" # The directory of your fine-tuned adapters
+# --- UI Elements ---
+st.title("📄 RAG and Fine-Tuning Query Interface")
+st.markdown("Enter your query below and choose a mode to get an answer from the system.")
 
-# --- Caching ---
-# Use Streamlit's caching to load models and data only once.
-@st.cache_resource
-def load_components():
-    """
-    Loads all the necessary models and data for the RAG and Fine-Tuned pipelines.
-    Returns a dictionary of components.
-    """
-    print("Loading components...")
-    components = {}
-    try:
-        # Load RAG components
-        components["embed_model"] = SentenceTransformer(EMBED_MODEL_NAME)
-        components["faiss_index"] = faiss.read_index(FAISS_INDEX_PATH)
-        with open(BM25_INDEX_PATH, 'rb') as f:
-            components["bm25_index"] = pickle.load(f)
-        with open(CHUNK_DATA_PATH, 'rb') as f:
-            components["chunk_data"] = pickle.load(f)
-        components["rag_generator"] = ResponseGenerator(model_name=RAG_GENERATOR_MODEL)
-        
-        # Load Fine-Tuned Model components
-        if os.path.exists(FINETUNED_ADAPTER_DIR):
-            device = "cuda" if torch.cuda.is_available() else "cpu"
-            
-            base_model = AutoModelForCausalLM.from_pretrained(FINETUNED_BASE_MODEL).to(device)
-            
-            tuned_model = PeftModel.from_pretrained(base_model, FINETUNED_ADAPTER_DIR)
-            tuned_tokenizer = AutoTokenizer.from_pretrained(FINETUNED_ADAPTER_DIR)
-            
-            components["finetuned_model"] = tuned_model
-            components["finetuned_tokenizer"] = tuned_tokenizer
-            print("Fine-tuned model loaded successfully.")
-        else:
-            print(f"Warning: Fine-tuned model directory not found at '{FINETUNED_ADAPTER_DIR}'.")
-            components["finetuned_model"] = None
+# Mode selection
+mode = st.radio(
+    "Select Mode:",
+    ("RAG", "Fine-Tuned"),
+    horizontal=True,
+    help="**RAG**: Retrieves relevant documents to augment the query. **Fine-Tuned**: Uses a model specially trained on a specific domain."
+)
 
-        print("All components loaded.")
-        return components
-        
-    except FileNotFoundError as e:
-        st.error(f"Error loading components: {e}. Please make sure 'build_indices.py' has been run successfully.")
-        return None
+# User query input
+user_query = st.text_input("Enter your query:", "")
 
-def generate_from_finetuned(model, tokenizer, query):
-    """Generates a response directly from the fine-tuned model."""
-    start_time = time.time()
-    device = next(model.parameters()).device
-    
-    prompt = f"Question: {query}\nAnswer:"
-    inputs = tokenizer(prompt, return_tensors="pt").to(device)
-    
-    outputs = model.generate(
-        **inputs,
-        max_new_tokens=100,
-        pad_token_id=tokenizer.eos_token_id
-    )
-    
-    response_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
-    answer = response_text.replace(prompt, "").strip().split('\n')[0]
-    
-    end_time = time.time()
-    inference_time = end_time - start_time
-    
-    return answer, inference_time
+# Submit button
+if st.button("Submit Query"):
+    if user_query:
+        # --- Backend Processing ---
+        with st.spinner("Processing your query... This may take a moment as the model loads for the first time."):
+            try:
+                # --- FIX: Pass the query as a named argument '--query' ---
+                command = ["python", "src/hybrid_retrieval.py", "--query", user_query, "--mode", mode]
+                
+                # Execute the script as a subprocess
+                process = subprocess.run(
+                    command,
+                    capture_output=True,
+                    text=True,
+                    check=True  # This will raise an error if the script fails
+                )
+                
+                # Find the JSON output from the last line of stdout
+                output_lines = process.stdout.strip().split('\n')
+                json_output = output_lines[-1]
+                
+                results = json.loads(json_output)
 
-# --- Main App UI ---
+                # --- Display Results ---
+                st.success("Query processed successfully!")
+                
+                st.subheader("Answer:")
+                st.markdown(f"> {results.get('answer', 'No answer provided.')}")
 
-st.set_page_config(page_title="Advanced Q&A System", layout="wide")
+                st.subheader("Response Details:")
+                col1, col2, col3 = st.columns(3)
+                col1.metric("Response Time", f"{results.get('response_time', 0):.2f} s")
+                col2.metric("Confidence Score", f"{results.get('confidence_score', 0) * 100:.2f}%")
+                col3.metric("Method Used", results.get('method_used', 'N/A'))
 
-st.title("Advanced Question-Answering System �")
-st.markdown("This interface allows you to ask questions using either a RAG pipeline or a fine-tuned model.")
-
-# Load all components
-components = load_components()
-
-# Sidebar for configuration
-with st.sidebar:
-    st.header("Configuration")
-    mode = st.radio(
-        "Choose the operational mode:",
-        ("RAG (Retrieval-Augmented Generation)", "Fine-Tuned Model")
-    )
-    st.markdown("---")
-    st.info("The RAG mode finds relevant documents first and then generates an answer. The Fine-Tuned mode uses a specialized model directly.")
-
-# Main panel for interaction
-if components:
-    query = st.text_input("Enter your question here:", key="query_input")
-
-    if st.button("Ask Question", key="ask_button"):
-        if not query:
-            st.warning("Please enter a question.")
-        else:
-            is_valid, message = validate_query(query)
-            if not is_valid:
-                st.error(f"Input Error: {message}")
-            else:
-                if mode == "RAG (Retrieval-Augmented Generation)":
-                    with st.spinner("Processing your query with the RAG pipeline..."):
-                        start_time = time.time()
-                        retrieved_chunks = retrieve(
-                            query, 
-                            components["embed_model"], 
-                            components["faiss_index"], 
-                            components["bm25_index"], 
-                            components["chunk_data"]
-                        )
-                        final_answer = components["rag_generator"].generate(query, retrieved_chunks)
-                        end_time = time.time()
-                        response_time = end_time - start_time
-                        
-                        st.subheader("Generated Answer")
-                        st.markdown(final_answer)
-                        st.markdown("---")
-
-                        col1, col2, col3 = st.columns(3)
-                        with col1:
-                            st.metric(label="Retrieval Confidence", value=f"{retrieved_chunks[0]['score']:.4f}" if retrieved_chunks else "N/A")
-                        with col2:
-                            st.metric(label="Method", value="RAG (Hybrid)")
-                        with col3:
-                            st.metric(label="Response Time", value=f"{response_time:.2f} s")
-                            
-                elif mode == "Fine-Tuned Model":
-                    if components.get("finetuned_model") is None:
-                        st.error("Fine-tuned model is not available. Please run the fine-tuning script first.")
-                    else:
-                        with st.spinner("Querying the fine-tuned model..."):
-                            answer, response_time = generate_from_finetuned(
-                                components["finetuned_model"],
-                                components["finetuned_tokenizer"],
-                                query
-                            )
-                            
-                            st.subheader("Generated Answer")
-                            st.markdown(answer)
-                            st.markdown("---")
-
-                            col1, col2, col3 = st.columns(3)
-                            with col1:
-                                st.metric(label="Confidence Score", value="N/A")
-                            with col2:
-                                st.metric(label="Method", value="Fine-Tuned Model")
-                            with col3:
-                                st.metric(label="Inference Time", value=f"{response_time:.2f} s")
-else:
-    st.error("Application components could not be loaded. Please check the console for errors.")
+            except subprocess.CalledProcessError as e:
+                st.error("An error occurred while running the backend script.")
+                st.code(f"Error Output:\n{e.stderr}") # Display the error for debugging
+            except (json.JSONDecodeError, IndexError):
+                st.error("Failed to decode the JSON response from the backend.")
+                st.code(f"Received Output:\n{process.stdout}")
+            except Exception as e:
+                st.error(f"An unexpected error occurred: {e}")
+    else:
+        st.warning("Please enter a query.")
