@@ -3,7 +3,14 @@ import pickle
 import string
 import time
 import json
-import numpy as np
+import subprocess
+import sys
+# Ensure numpy is installed
+try:
+    import numpy as np
+except ImportError:
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "numpy"])
+    import numpy as np
 import faiss
 from sentence_transformers import SentenceTransformer
 import nltk
