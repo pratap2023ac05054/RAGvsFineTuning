@@ -1,5 +1,4 @@
 torch
-numpy
 transformers
 datasets
 accelerate
@@ -13,11 +12,11 @@ pdf2image
 pytesseract
 nltk
 scikit-learn
+numpy
 streamlit
 huggingface_hub
 ctransformers
 python-dotenv
-pyarrow 
-numpy
+pyarrow
 pandas
 scikit-learn
