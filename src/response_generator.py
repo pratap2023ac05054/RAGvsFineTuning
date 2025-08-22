@@ -53,7 +53,7 @@ class ResponseGenerator:
 
         final_prompt = prompt_tmpl.format(context="\n".join(context_passages), question=query)
         
-        # Tokenize the final prompt
+        # Tokenize the final prompt, returning PyTorch tensors
         inputs = self.tokenizer(
             final_prompt, 
             return_tensors="pt",
@@ -61,19 +61,14 @@ class ResponseGenerator:
             max_length=self.max_positions - 250 # Leave room for generation
         )
 
-        # --- FIX: Robustly handle tokenizer output ---
-        # The tokenizer might return a 1D tensor (a flat list) or a 2D tensor (a batched list).
-        # We check the dimension (.ndim) to handle both cases correctly.
-        ids_tensor = inputs['input_ids']
-        if ids_tensor.ndim > 1:
-            # It's a batched output (e.g., tensor([[1, 2, 3]])), so select the first item.
-            input_token_ids = ids_tensor[0].tolist()
-        else:
-            # It's a single, flat output (e.g., tensor([1, 2, 3])), so use it directly.
-            input_token_ids = ids_tensor.tolist()
+        # --- FIX: Pass the PyTorch tensor directly to the model ---
+        # The ctransformers library expects a tensor-like object that it can
+        # internally convert to a list. Passing the tensor directly is the
+        # correct way and avoids the AttributeError inside the library.
+        input_ids_tensor = inputs['input_ids']
         
         output_token_ids = self.model(
-            input_token_ids,
+            input_ids_tensor,
             max_new_tokens=250,
             temperature=0.7,
             top_p=0.95,
