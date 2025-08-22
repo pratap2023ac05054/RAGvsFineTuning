@@ -15,7 +15,7 @@ import subprocess
 # Add the local 'packages' folder to the Python path.
 # This forces the script to look for imports in this directory first.
 # NOTE: Assumes you have a folder named 'packages' in the same directory as this script.
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'packages')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'package')))
 # The faiss-cpu library has a hard dependency on NumPy.
 # We import it only where needed to interact with the faiss index.
 import faiss

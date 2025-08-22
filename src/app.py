@@ -2,6 +2,31 @@ import streamlit as st
 import subprocess
 import json
 import time
+import faiss
+
+try:
+    from sentence_transformers import SentenceTransformer
+except ImportError:
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "sentence-transformers"])
+    from sentence_transformers import SentenceTransformer
+
+import nltk
+from response_generator import ResponseGenerator
+
+# --- NLTK Data Download Logic ---
+try:
+    nltk.data.find('tokenizers/punkt')
+    nltk.data.find('corpora/stopwords')
+except LookupError:
+    print("Downloading NLTK data packages...")
+    nltk.download('punkt', quiet=True)
+    nltk.download('stopwords', quiet=True)
+
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+
+# --- Configuration ---
+EMBED_MODEL_NAME = "all-MiniLM-L6-v2"
 
 # --- Page Configuration ---
 st.set_page_config(
