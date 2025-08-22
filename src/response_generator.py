@@ -34,8 +34,13 @@ class ResponseGenerator:
         print(f"Model and Tokenizer loaded. Max positions: {self.max_positions}")
 
     def generate(self, query: str, retrieved_chunks: list[dict]) -> str:
-        context_passages = [c["text"] for c in retrieved_chunks]
-        
+        """
+        Builds a prompt that respects the model's context window by iteratively
+        adding context chunks until the token limit is reached.
+        """
+        # Reserve 250 tokens for the model to generate its response
+        max_input_tokens = self.max_positions - 250
+
         # TinyLlama chat format for RAG
         prompt_tmpl = (
             "<|system|>\n"
@@ -45,18 +50,31 @@ class ResponseGenerator:
             "Question: {question}</s>\n"
             "<|assistant|>"
         )
-        final_prompt = prompt_tmpl.format(
-            context="\n".join(context_passages),
-            question=query
-        )
 
-        # Ensure prompt fits within the model's context window
-        enc = self.tokenizer(final_prompt, return_tensors=None, add_special_tokens=False)
-        max_input = self.max_positions - 250 # Reserve 250 tokens for generation
-        if len(enc["input_ids"]) > max_input:
-            trimmed_ids = enc["input_ids"][-max_input:]
-            final_prompt = self.tokenizer.decode(trimmed_ids, skip_special_tokens=True)
+        # 1. Calculate tokens used by the prompt template and query
+        base_prompt = prompt_tmpl.format(context="", question=query)
+        base_tokens = self.tokenizer(base_prompt, add_special_tokens=False)['input_ids']
+        available_tokens_for_context = max_input_tokens - len(base_tokens)
 
+        # 2. Iteratively build context until available tokens are used
+        context_passages = []
+        current_token_count = 0
+        for chunk in retrieved_chunks:
+            chunk_text = chunk["text"] + "\n"
+            chunk_tokens = self.tokenizer(chunk_text, add_special_tokens=False)['input_ids']
+            
+            if current_token_count + len(chunk_tokens) <= available_tokens_for_context:
+                context_passages.append(chunk_text)
+                current_token_count += len(chunk_tokens)
+            else:
+                break # Stop if adding the next chunk would exceed the limit
+
+        final_context = "".join(context_passages)
+        
+        # 3. Format the final prompt with the curated context
+        final_prompt = prompt_tmpl.format(context=final_context, question=query)
+
+        # 4. Generate the response
         output_text = self.model(
             final_prompt,
             max_new_tokens=250,

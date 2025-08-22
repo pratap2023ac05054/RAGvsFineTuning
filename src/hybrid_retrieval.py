@@ -14,14 +14,16 @@ from nltk.tokenize import word_tokenize
 from response_generator import ResponseGenerator
 from guardrails import validate_query, validate_response
 
-# Ensures NLTK data is available.
+# Ensures all necessary NLTK data is available.
 try:
     nltk.data.find('tokenizers/punkt')
     nltk.data.find('corpora/stopwords')
+    nltk.data.find('tokenizers/punkt_tab') # <-- Check for the missing resource
 except LookupError:
     print("Downloading NLTK data packages...")
     nltk.download('punkt', quiet=True)
     nltk.download('stopwords', quiet=True)
+    nltk.download('punkt_tab', quiet=True) # <-- Add the download for the missing resource
 
 EMBED_MODEL_NAME = "all-MiniLM-L6-v2"
 TOP_N = 10
