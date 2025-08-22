@@ -17,7 +17,7 @@ FAISS_INDEX_PATH = "faiss_index.bin"
 BM25_INDEX_PATH = "bm25_index.pkl"
 CHUNK_DATA_PATH = "chunk_data.pkl"
 EMBED_MODEL_NAME = "all-MiniLM-L6-v2"
-GENERATOR_MODEL = "TheBloke/Mistral-7B-Instruct-v0.2-GGUF"
+GENERATOR_MODEL = "TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF"
 
 # --- Caching ---
 @st.cache_resource
@@ -38,27 +38,30 @@ def load_components():
     except FileNotFoundError as e:
         st.error(f"Error loading components: {e}. Please run 'build_indices.py' first.")
         return None
+    except Exception as e:
+        st.error(f"An error occurred while loading components: {e}")
+        return None
 
-# --- CORRECTED FUNCTION ---
+
 def generate_directly(generator: ResponseGenerator, query: str):
-    """
-    Generates a response directly from the ctransformers model.
-    This function now correctly passes a string prompt to the model.
-    """
+    """Generates a response directly from the TinyLlama model."""
     start_time = time.time()
     model = generator.model
-    # The prompt format should match the model's fine-tuning
-    prompt = f"<s>[INST] {query} [/INST]"
+    
+    # Use the TinyLlama chat format
+    prompt = (
+        f"<|system|>\nYou are a helpful assistant.</s>\n"
+        f"<|user|>\n{query}</s>\n"
+        f"<|assistant|>"
+    )
 
-    # ctransformers models are called directly with the prompt string.
-    # It handles tokenization and decoding internally.
     answer = model(
         prompt,
         max_new_tokens=250,
         temperature=0.7,
         top_p=0.95,
         repetition_penalty=1.1,
-        stop=["</s>"] # Use the end-of-sequence token to stop generation
+        stop=[generator.tokenizer.eos_token]
     )
 
     end_time = time.time()
@@ -75,12 +78,12 @@ with st.sidebar:
     st.header("Configuration")
     mode = st.radio(
         "Choose the operational mode:",
-        ("RAG (Retrieval-Augmented Generation)", "Direct Generation (Mistral 7B)")
+        ("RAG (Retrieval-Augmented Generation)", "Direct Generation (TinyLlama)")
     )
     st.markdown("---")
     st.info(
         "**RAG mode** finds relevant documents first and generates an answer based on them.\n\n"
-        "**Direct Generation** uses the powerful Mistral-7B model to answer directly from its own knowledge."
+        "**Direct Generation** uses the TinyLlama model to answer from its own knowledge."
     )
 
 if components:
@@ -118,8 +121,8 @@ if components:
                         with col3:
                             st.metric(label="Response Time", value=f"{response_time:.2f} s")
 
-                elif mode == "Direct Generation (Mistral 7B)":
-                    with st.spinner("Querying the Mistral-7B model directly..."):
+                elif mode == "Direct Generation (TinyLlama)":
+                    with st.spinner("Querying the TinyLlama model directly..."):
                         answer, response_time = generate_directly(
                             components["generator"],
                             query
@@ -131,7 +134,7 @@ if components:
                         with col1:
                             st.metric(label="Confidence Score", value="N/A (Direct)")
                         with col2:
-                            st.metric(label="Method", value="Direct Generation (Mistral 7B)")
+                            st.metric(label="Method", value="Direct Generation (TinyLlama)")
                         with col3:
                             st.metric(label="Inference Time", value=f"{response_time:.2f} s")
 else:

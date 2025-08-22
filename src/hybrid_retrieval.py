@@ -2,46 +2,35 @@
 
 import argparse
 import pickle
-import re
 import string
 import faiss
 from sentence_transformers import SentenceTransformer
 import nltk
-
-# Import the new components
-from response_generator import ResponseGenerator
-from guardrails import validate_query, validate_response
-
-# --- NLTK Data Download Logic ---
-# This block ensures the necessary NLTK data is available before proceeding.
-try:
-    print("Verifying NLTK data packages...")
-    nltk.data.find('tokenizers/punkt')
-    nltk.data.find('corpora/stopwords')
-    nltk.data.find('tokenizers/punkt_tab')
-    print("NLTK packages are already downloaded.")
-except LookupError:
-    print("One or more NLTK data packages not found. Downloading...")
-    nltk.download('punkt', quiet=False)
-    nltk.download('stopwords', quiet=False)
-    nltk.download('punkt_tab', quiet=False)
-    print("NLTK data download complete.")
-
 import numpy as np
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 
-# --- Configuration ---
+# Import components needed for the command-line interface
+from response_generator import ResponseGenerator
+from guardrails import validate_query, validate_response
+
+# Ensures NLTK data is available.
+try:
+    nltk.data.find('tokenizers/punkt')
+    nltk.data.find('corpora/stopwords')
+except LookupError:
+    print("Downloading NLTK data packages...")
+    nltk.download('punkt', quiet=True)
+    nltk.download('stopwords', quiet=True)
+
 EMBED_MODEL_NAME = "all-MiniLM-L6-v2"
 TOP_N = 10
 RRF_K = 60
 
-# --- Artifact file paths ---
 FAISS_INDEX_PATH = "faiss_index.bin"
 BM25_INDEX_PATH = "bm25_index.pkl"
 CHUNK_DATA_PATH = "chunk_data.pkl"
 
-# --- Pre-computation ---
 STOPWORDS = set(stopwords.words('english'))
 
 def preprocess_query(query: str) -> tuple[str, list[str]]:
@@ -64,8 +53,7 @@ def reciprocal_rank_fusion(retrieved_lists: list[list[int]], k: int = RRF_K) -> 
 def retrieve(query: str, embed_model, faiss_index, bm25_index, chunk_data):
     """Performs the full hybrid retrieval pipeline."""
     preprocessed_query, bm25_tokens = preprocess_query(query)
-    print(f"Preprocessed Query: '{preprocessed_query}'\n")
-
+    
     query_embedding = embed_model.encode([preprocessed_query]).astype(np.float32)
 
     _, dense_indices = faiss_index.search(query_embedding, k=TOP_N)
@@ -73,7 +61,7 @@ def retrieve(query: str, embed_model, faiss_index, bm25_index, chunk_data):
 
     bm25_scores = bm25_index.get_scores(bm25_tokens)
     sparse_retrieved_ids = np.argsort(bm25_scores)[::-1][:TOP_N].tolist()
-
+    
     print(f"Dense Retriever found IDs: {dense_retrieved_ids}")
     print(f"Sparse Retriever found IDs: {sparse_retrieved_ids}")
 
@@ -85,18 +73,18 @@ def retrieve(query: str, embed_model, faiss_index, bm25_index, chunk_data):
     return final_results
 
 def main():
-    """Main function to load indices and run the full RAG pipeline."""
-    parser = argparse.ArgumentParser(description="Full RAG Pipeline with Guardrails")
-    parser.add_argument("--query", type=str, required=True, help="Your question")
+    """Main function to run the full RAG pipeline from the command line."""
+    parser = argparse.ArgumentParser(description="Query the RAG system from the command line.")
+    parser.add_argument("--query", type=str, required=True, help="The question you want to ask.")
     args = parser.parse_args()
 
-    # --- Step 1: Input Guardrail ---
+    # 1. Input Guardrail
     is_valid, message = validate_query(args.query)
     if not is_valid:
         print(f"Input Error: {message}")
         return
 
-    # Load retrieval components
+    # 2. Load retrieval components
     print("Loading retrieval indices and data...")
     try:
         embed_model = SentenceTransformer(EMBED_MODEL_NAME)
@@ -109,17 +97,17 @@ def main():
         print("Error: Index files not found. Please run 'build_indices.py' first.")
         return
 
-    # Initialize the Response Generator
+    # 3. Initialize the Response Generator
     generator = ResponseGenerator()
 
-    # --- Step 2: Retrieve relevant chunks ---
+    # 4. Retrieve relevant chunks
     retrieved_chunks = retrieve(args.query, embed_model, faiss_index, bm25_index, chunk_data)
 
-    # --- Step 3: Generate the final answer ---
-    print("Generating final answer...")
+    # 5. Generate the final answer
+    print("\nGenerating final answer...")
     final_answer = generator.generate(args.query, retrieved_chunks)
 
-    # --- Step 4: Output Guardrail ---
+    # 6. Output Guardrail
     context_texts = [chunk['text'] for chunk in retrieved_chunks[:5]] # Use top 5 for validation
     validation_result = validate_response(final_answer, context_texts)
 
@@ -138,5 +126,6 @@ def main():
         print(f"   Details: {validation_result.get('details', 'N/A')}")
 
 
+# This block allows the script to be run from the command line
 if __name__ == "__main__":
     main()
