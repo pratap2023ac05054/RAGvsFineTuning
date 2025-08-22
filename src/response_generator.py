@@ -41,46 +41,43 @@ class ResponseGenerator:
         print(f"Model and Tokenizer loaded. Max positions: {self.max_positions}")
 
     def generate(self, query: str, retrieved_chunks: list[dict]) -> str:
-        """
-        Generates a final answer using the retrieved context.
-        """
+        # 1) Build prompt from retrieved context
         context_passages = [c["text"] for c in retrieved_chunks]
         prompt_tmpl = (
             "<s>[INST] Answer the following question based on the context provided below.\n\n"
             "Context:\n{context}\n\n"
             "Question: {question} [/INST]"
         )
-
-        final_prompt = prompt_tmpl.format(context="\n".join(context_passages), question=query)
-        
-        # Tokenize the final prompt
-        inputs = self.tokenizer(
-            final_prompt, 
-            return_tensors="pt",
-            truncation=True,
-            max_length=self.max_positions - 250 # Leave room for generation
+        final_prompt = prompt_tmpl.format(
+            context="\n".join(context_passages),
+            question=query
         )
 
-        # --- FIX: Correctly call the ctransformers model ---
-        # The 'ctransformers' library does not use a .generate() method.
-        # Instead, you call the model object directly.
-        # It expects a plain list of token IDs, not a PyTorch tensor.
-        input_token_ids = inputs['input_ids'][0].tolist()
-        
-        output_token_ids = self.model(
-            input_token_ids,
+        # 2) Use the HF tokenizer only to keep prompt within model context
+        #    (no tensors, so we avoid .tolist() entirely)
+        enc = self.tokenizer(final_prompt, return_tensors=None, add_special_tokens=False)
+        max_input = self.max_positions - 250  # reserve room for generation
+        if len(enc["input_ids"]) > max_input:
+            trimmed_ids = enc["input_ids"][-max_input:]          # keep tail if too long
+            final_prompt = self.tokenizer.decode(trimmed_ids, skip_special_tokens=True)
+
+        # 3) Generate with ctransformers (string in, string out)
+        #    'stop' expects strings; include common EOS variants for Mistral/LLaMA-family
+        stop_list = []
+        if getattr(self.tokenizer, "eos_token", None):
+            stop_list = [self.tokenizer.eos_token, "</s>"]
+
+        output_text = self.model(
+            final_prompt,
             max_new_tokens=250,
             temperature=0.7,
             top_p=0.95,
             repetition_penalty=1.1,
-            stop_tokens=[self.tokenizer.eos_token_id]
+            stop=stop_list or None
         )
-        
-        # The output from ctransformers is only the *newly generated* tokens,
-        # so we can decode it directly without slicing.
-        answer = self.tokenizer.decode(output_token_ids, skip_special_tokens=True)
-        
+
+        # 4) ctransformers returns text; no need to decode token IDs
+        answer = (output_text or "").strip()
         if not answer:
             answer = "I couldn’t produce a confident answer with the provided context."
-            
-        return answer.strip()
+        return answer
