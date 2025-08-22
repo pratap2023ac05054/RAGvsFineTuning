@@ -1,18 +1,24 @@
+import sys
+import os
+
+
+# --- MODIFICATION END ---
+
 import argparse
 import pickle
 import string
 import time
 import json
 import subprocess
-import sys
 
+# --- MODIFICATION START ---
+# Add the local 'packages' folder to the Python path.
+# This forces the script to look for imports in this directory first.
+# NOTE: Assumes you have a folder named 'packages' in the same directory as this script.
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'packages')))
 # The faiss-cpu library has a hard dependency on NumPy.
 # We import it only where needed to interact with the faiss index.
-try:
-    import faiss
-except ImportError:
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "faiss-cpu"])
-    import faiss
+import faiss
 
 try:
     from sentence_transformers import SentenceTransformer
