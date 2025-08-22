@@ -1,72 +1,145 @@
+# app.py
+
 import streamlit as st
-import subprocess
-import json
 import time
+import torch
+from sentence_transformers import SentenceTransformer
+import faiss
+import pickle
+import os
 
-# --- Page Configuration ---
-st.set_page_config(
-    page_title="Query Interface",
-    page_icon="🤖",
-    layout="wide"
-)
+from response_generator import ResponseGenerator
+from guardrails import validate_query
+from hybrid_retrieval import retrieve 
 
-# --- UI Elements ---
-st.title("📄 RAG and Fine-Tuning Query Interface")
-st.markdown("Enter your query below and choose a mode to get an answer from the system.")
+# --- Configuration ---
+FAISS_INDEX_PATH = "faiss_index.bin"
+BM25_INDEX_PATH = "bm25_index.pkl"
+CHUNK_DATA_PATH = "chunk_data.pkl"
+EMBED_MODEL_NAME = "all-MiniLM-L6-v2"
+GENERATOR_MODEL = "TheBloke/Mistral-7B-Instruct-v0.2-GGUF"
 
-# Mode selection
-mode = st.radio(
-    "Select Mode:",
-    ("RAG", "Fine-Tuned"),
-    horizontal=True,
-    help="**RAG**: Retrieves relevant documents to augment the query. **Fine-Tuned**: Uses a model specially trained on a specific domain."
-)
+# --- Caching ---
+@st.cache_resource
+def load_components():
+    """Loads all necessary models and data."""
+    print("Loading components...")
+    components = {}
+    try:
+        components["embed_model"] = SentenceTransformer(EMBED_MODEL_NAME)
+        components["faiss_index"] = faiss.read_index(FAISS_INDEX_PATH)
+        with open(BM25_INDEX_PATH, 'rb') as f:
+            components["bm25_index"] = pickle.load(f)
+        with open(CHUNK_DATA_PATH, 'rb') as f:
+            components["chunk_data"] = pickle.load(f)
+        components["generator"] = ResponseGenerator(model_name=GENERATOR_MODEL)
+        print("All components loaded.")
+        return components
+    except FileNotFoundError as e:
+        st.error(f"Error loading components: {e}. Please run 'build_indices.py' first.")
+        return None
 
-# User query input
-user_query = st.text_input("Enter your query:", "")
+def generate_directly(generator: ResponseGenerator, query: str):
+    """Generates a response directly from the model without retrieval (zero-shot)."""
+    start_time = time.time()
+    model = generator.model
+    tokenizer = generator.tokenizer
+    prompt = f"<s>[INST] {query} [/INST]"
+    
+    # --- FIX: Tokenizer returns a dictionary with attention_mask ---
+    inputs = tokenizer(
+        prompt, 
+        return_tensors="pt"
+    ).to(model.device)
+    
+    input_len = inputs['input_ids'].shape[1]
+    
+    # --- FIX: Pass inputs dictionary and enable sampling ---
+    output_token_ids = model.generate(
+        **inputs,
+        max_new_tokens=250,
+        temperature=0.7,
+        top_p=0.95,
+        repetition_penalty=1.1,
+        do_sample=True, # Enable sampling
+        pad_token_id=tokenizer.eos_token_id # Specify pad token
+    )
+    
+    # Decode only the newly generated tokens
+    answer = tokenizer.decode(output_token_ids[0][input_len:], skip_special_tokens=True)
 
-# Submit button
-if st.button("Submit Query"):
-    if user_query:
-        # --- Backend Processing ---
-        with st.spinner("Processing your query... This may take a moment as the model loads for the first time."):
-            try:
-                # --- FIX: Pass the query as a named argument '--query' ---
-                command = ["python", "src/hybrid_retrieval.py", "--query", user_query, "--mode", mode]
-                
-                # Execute the script as a subprocess
-                process = subprocess.run(
-                    command,
-                    capture_output=True,
-                    text=True,
-                    check=True  # This will raise an error if the script fails
-                )
-                
-                # Find the JSON output from the last line of stdout
-                output_lines = process.stdout.strip().split('\n')
-                json_output = output_lines[-1]
-                
-                results = json.loads(json_output)
+    end_time = time.time()
+    inference_time = end_time - start_time
+    return answer.strip(), inference_time
 
-                # --- Display Results ---
-                st.success("Query processed successfully!")
-                
-                st.subheader("Answer:")
-                st.markdown(f"> {results.get('answer', 'No answer provided.')}")
+# --- Main App UI ---
+st.set_page_config(page_title="Advanced Q&A System", layout="wide")
+st.title("Advanced Question-Answering System 🤖")
+st.markdown("This interface allows you to ask questions using either a RAG pipeline or by querying the model directly.")
+components = load_components()
 
-                st.subheader("Response Details:")
-                col1, col2, col3 = st.columns(3)
-                col1.metric("Response Time", f"{results.get('response_time', 0):.2f} s")
-                col2.metric("Confidence Score", f"{results.get('confidence_score', 0) * 100:.2f}%")
-                col3.metric("Method Used", results.get('method_used', 'N/A'))
+with st.sidebar:
+    st.header("Configuration")
+    mode = st.radio(
+        "Choose the operational mode:",
+        ("RAG (Retrieval-Augmented Generation)", "Direct Generation (Mistral 7B)")
+    )
+    st.markdown("---")
+    st.info(
+        "**RAG mode** finds relevant documents first and generates an answer based on them.\n\n"
+        "**Direct Generation** uses the powerful Mistral-7B model to answer directly from its own knowledge."
+    )
 
-            except subprocess.CalledProcessError as e:
-                st.error("An error occurred while running the backend script.")
-                st.code(f"Error Output:\n{e.stderr}") # Display the error for debugging
-            except (json.JSONDecodeError, IndexError):
-                st.error("Failed to decode the JSON response from the backend.")
-                st.code(f"Received Output:\n{process.stdout}")
-            except Exception as e:
-                st.error(f"An unexpected error occurred: {e}")
-    else:
-        st.warning("Please enter a query.")
+if components:
+    query = st.text_input("Enter your question here:", key="query_input")
+    if st.button("Ask Question", key="ask_button"):
+        if not query:
+            st.warning("Please enter a question.")
+        else:
+            is_valid, message = validate_query(query)
+            if not is_valid:
+                st.error(f"Input Error: {message}")
+            else:
+                if mode == "RAG (Retrieval-Augmented Generation)":
+                    with st.spinner("Processing your query with the RAG pipeline..."):
+                        start_time = time.time()
+                        retrieved_chunks = retrieve(
+                            query,
+                            components["embed_model"],
+                            components["faiss_index"],
+                            components["bm25_index"],
+                            components["chunk_data"]
+                        )
+                        final_answer = components["generator"].generate(query, retrieved_chunks)
+                        end_time = time.time()
+                        response_time = end_time - start_time
+
+                        st.subheader("Generated Answer")
+                        st.markdown(final_answer)
+                        st.markdown("---")
+                        col1, col2, col3 = st.columns(3)
+                        with col1:
+                            st.metric(label="Retrieval Confidence", value=f"{retrieved_chunks[0]['score']:.4f}" if retrieved_chunks else "N/A")
+                        with col2:
+                            st.metric(label="Method", value="RAG (Hybrid)")
+                        with col3:
+                            st.metric(label="Response Time", value=f"{response_time:.2f} s")
+
+                elif mode == "Direct Generation (Mistral 7B)":
+                    with st.spinner("Querying the Mistral-7B model directly..."):
+                        answer, response_time = generate_directly(
+                            components["generator"],
+                            query
+                        )
+                        st.subheader("Generated Answer")
+                        st.markdown(answer)
+                        st.markdown("---")
+                        col1, col2, col3 = st.columns(3)
+                        with col1:
+                            st.metric(label="Confidence Score", value="N/A (Direct)")
+                        with col2:
+                            st.metric(label="Method", value="Direct Generation (Mistral 7B)")
+                        with col3:
+                            st.metric(label="Inference Time", value=f"{response_time:.2f} s")
+else:
+    st.error("Application components could not be loaded. Please check the console for errors.")

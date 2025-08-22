@@ -1,65 +1,81 @@
 import os
+import torch
 from dotenv import load_dotenv
+from transformers import AutoTokenizer
 from ctransformers import AutoModelForCausalLM
-from huggingface_hub import login
 
 class ResponseGenerator:
     """
-    Loads the Mistral 7B GGUF language model by downloading it from the
-    Hugging Face Hub and running it on the CPU.
+    Loads a GGUF language model for generation and a separate transformers
+    tokenizer for reliable text processing.
     """
-    _model = None  # Class-level variable to hold the model singleton
+    def __init__(self, model_name: str = "TheBloke/Mistral-7B-Instruct-v0.2-GGUF"):
+        load_dotenv()
+        hf_token = os.getenv("HF_TOKEN")
+        if not hf_token:
+            print("Warning: Hugging Face token not found.")
 
-    def __init__(self, model_repo: str = "TheBloke/Mistral-7B-Instruct-v0.2-GGUF", model_file: str = "mistral-7b-instruct-v0.2.Q4_K_M.gguf"):
-        if ResponseGenerator._model is None:
-            load_dotenv()
-            hf_token = os.getenv("HUGGING_FACE_HUB_TOKEN")
+        print(f"Loading generator model '{model_name}'...")
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        CONTEXT_LENGTH = 4096
 
-            if not hf_token:
-                raise ValueError("Hugging Face token not found. Please add it to your .env file.")
-
-            print("Authenticating with Hugging Face Hub...")
-            login(token=hf_token)
-            # FIX: Replaced emoji with standard text to prevent encoding errors
-            print("(SUCCESS) Authentication successful.")
-
-            print(f"Downloading/loading model: {model_repo}/{model_file}")
-            try:
-                # Load the model only once and store it in the class variable
-                ResponseGenerator._model = AutoModelForCausalLM.from_pretrained(
-                    model_path_or_repo_id=model_repo,
-                    model_file=model_file,
-                    model_type="mistral",
-                    gpu_layers=0,  # Set to 0 for CPU to avoid CUDA errors
-                    context_length=4096,
-                )
-                # FIX: Replaced emoji with standard text
-                print("(SUCCESS) Model loaded successfully on CPU.")
-            except Exception as e:
-                print(f"--- ERROR LOADING MODEL ---: {e}")
-                raise
+        self.model = AutoModelForCausalLM.from_pretrained(
+            model_name,
+            model_file="mistral-7b-instruct-v0.2.Q4_K_M.gguf",
+            model_type="mistral",
+            gpu_layers=50 if self.device == "GPU" else 0,
+            hf=True,
+            context_length=CONTEXT_LENGTH
+        ).to(self.device)
         
-        self.model = ResponseGenerator._model
-
+        print("Loading separate tokenizer...")
+        tokenizer_name = "mistralai/Mistral-7B-Instruct-v0.2"
+        self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_name, token=hf_token)
+        
+        # --- FIX: Set a pad token to enable correct attention masking ---
+        if self.tokenizer.pad_token is None:
+            self.tokenizer.pad_token = self.tokenizer.eos_token
+        
+        self.max_positions = CONTEXT_LENGTH
+        print(f"Model and Tokenizer loaded. Max positions: {self.max_positions}")
 
     def generate(self, query: str, retrieved_chunks: list[dict]) -> str:
+        """
+        Generates a final answer using the retrieved context.
+        """
         context_passages = [c["text"] for c in retrieved_chunks]
-        packed_context = "\n".join(context_passages)
-
-        if not packed_context.strip():
-            return "Could not generate an answer because no relevant context was found."
-
-        user_prompt = (
-            f"[INST] Answer the question based on the context.\n\n"
-            f"Context:\n{packed_context.strip()}\n\n"
-            f"Question: {query} [/INST]"
+        prompt_tmpl = (
+            "<s>[INST] Answer the following question based on the context provided below.\n\n"
+            "Context:\n{context}\n\n"
+            "Question: {question} [/INST]"
         )
 
-        answer = self.model(
-            user_prompt,
-            max_new_tokens=256,
+        final_prompt = prompt_tmpl.format(context="\n".join(context_passages), question=query)
+        
+        # --- FIX: Tokenizer now returns a dictionary with 'input_ids' and 'attention_mask' ---
+        inputs = self.tokenizer(
+            final_prompt, 
+            return_tensors="pt",
+            truncation=True,
+            max_length=self.max_positions - 250 # Leave room for generation
+        ).to(self.device)
+
+        input_len = inputs['input_ids'].shape[1]
+        
+        # --- FIX: Pass inputs dictionary and enable sampling ---
+        output_token_ids = self.model.generate(
+            **inputs,
+            max_new_tokens=250,
             temperature=0.7,
             top_p=0.95,
+            repetition_penalty=1.1,
+            do_sample=True, # Enable sampling
+            pad_token_id=self.tokenizer.eos_token_id # Specify pad token
         )
-
-        return answer.strip() if answer else "The model generated an empty response."
+        
+        answer = self.tokenizer.decode(output_token_ids[0][input_len:], skip_special_tokens=True)
+        
+        if not answer:
+            answer = "I couldn’t produce a confident answer with the provided context."
+            
+        return answer.strip()
