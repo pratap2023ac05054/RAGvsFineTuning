@@ -61,11 +61,10 @@ class ResponseGenerator:
             max_length=self.max_positions - 250 # Leave room for generation
         )
 
-        # --- FIX: Pass the PyTorch tensor directly to the model ---
-        # The ctransformers library expects a tensor-like object that it can
-        # internally convert to a list. Passing the tensor directly is the
-        # correct way and avoids the AttributeError inside the library.
-        input_ids_tensor = inputs['input_ids']
+        # We select the first (and only) item from the batch ([0]) to convert
+        # the 2D tensor of shape [1, sequence_length] to the 1D tensor of
+        # shape [sequence_length] that the model expects.
+        input_ids_tensor = inputs['input_ids'][0]
         
         output_token_ids = self.model(
             input_ids_tensor,
