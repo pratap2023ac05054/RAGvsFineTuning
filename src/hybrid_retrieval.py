@@ -1,19 +1,36 @@
-# hybrid_retrieval.py
-
 import argparse
 import pickle
+import re
+import string
 import faiss
-import numpy as np
 from sentence_transformers import SentenceTransformer
+import nltk
 
-# Import from other project files
+# Import the new components
 from response_generator import ResponseGenerator
 from guardrails import validate_query, validate_response
-from utils import preprocess_query # <-- MODIFIED: Import the moved function
+
+# --- NLTK Data Download Logic ---
+# This block ensures the necessary NLTK data is available before proceeding.
+try:
+    print("Verifying NLTK data packages...")
+    nltk.data.find('tokenizers/punkt')
+    nltk.data.find('corpora/stopwords')
+    nltk.data.find('tokenizers/punkt_tab')
+    print("NLTK packages are already downloaded.")
+except LookupError:
+    print("One or more NLTK data packages not found. Downloading...")
+    nltk.download('punkt', quiet=False)
+    nltk.download('stopwords', quiet=False)
+    nltk.download('punkt_tab', quiet=False)
+    print("NLTK data download complete.")
+
+import numpy as np
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
 
 # --- Configuration ---
-# MODIFIED: Use the full, explicit Hugging Face model identifier
-EMBED_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
+EMBED_MODEL_NAME = "all-MiniLM-L6-v2"
 TOP_N = 10
 RRF_K = 60
 
@@ -21,6 +38,16 @@ RRF_K = 60
 FAISS_INDEX_PATH = "faiss_index.bin"
 BM25_INDEX_PATH = "bm25_index.pkl"
 CHUNK_DATA_PATH = "chunk_data.pkl"
+
+# --- Pre-computation ---
+STOPWORDS = set(stopwords.words('english'))
+
+def preprocess_query(query: str) -> tuple[str, list[str]]:
+    """Cleans, lowercases, and removes stopwords from a query."""
+    query = query.lower().translate(str.maketrans('', '', string.punctuation))
+    tokens = word_tokenize(query)
+    filtered_tokens = [word for word in tokens if word not in STOPWORDS and word.isalnum()]
+    return " ".join(filtered_tokens), filtered_tokens
 
 def reciprocal_rank_fusion(retrieved_lists: list[list[int]], k: int = RRF_K) -> dict[int, float]:
     """Combines multiple ranked lists using Reciprocal Rank Fusion."""
