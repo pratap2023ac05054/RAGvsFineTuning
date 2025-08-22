@@ -18,3 +18,4 @@ huggingface_hub
 optimum
 python-dotenv
 pyarrow
+llama-cpp-python
