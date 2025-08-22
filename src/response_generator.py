@@ -10,30 +10,30 @@ class ResponseGenerator:
     tokenizer for reliable text processing.
     """
     def __init__(self, model_name: str = "TheBloke/Mistral-7B-Instruct-v0.2-GGUF"):
-        # --- MODIFIED: Read token from Streamlit's secrets ---
+        # Read token from Streamlit's secrets
         hf_token = st.secrets.get("HF_TOKEN")
         if not hf_token:
-            # Use st.warning for better visibility in the app
             st.warning("Warning: Hugging Face token not found in Streamlit secrets.")
 
         print(f"Loading generator model '{model_name}'...")
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         CONTEXT_LENGTH = 4096
 
+        # The ctransformers library is used to load the GGUF model
         self.model = AutoModelForCausalLM.from_pretrained(
             model_name,
             model_file="mistral-7b-instruct-v0.2.Q4_K_M.gguf",
             model_type="mistral",
-            gpu_layers=50 if self.device == "GPU" else 0,
+            gpu_layers=50 if self.device == "cuda" else 0, # Corrected device check
             hf=True,
             context_length=CONTEXT_LENGTH
-        ).to(self.device)
+        )
         
         print("Loading separate tokenizer...")
         tokenizer_name = "mistralai/Mistral-7B-Instruct-v0.2"
         self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_name, token=hf_token)
         
-        # --- FIX: Set a pad token to enable correct attention masking ---
+        # Set a pad token to enable correct attention masking if it's missing
         if self.tokenizer.pad_token is None:
             self.tokenizer.pad_token = self.tokenizer.eos_token
         
@@ -53,28 +53,32 @@ class ResponseGenerator:
 
         final_prompt = prompt_tmpl.format(context="\n".join(context_passages), question=query)
         
-        # --- FIX: Tokenizer now returns a dictionary with 'input_ids' and 'attention_mask' ---
+        # Tokenize the final prompt
         inputs = self.tokenizer(
             final_prompt, 
             return_tensors="pt",
             truncation=True,
             max_length=self.max_positions - 250 # Leave room for generation
-        ).to(self.device)
+        )
 
-        input_len = inputs['input_ids'].shape[1]
+        # --- FIX: Correctly call the ctransformers model ---
+        # The 'ctransformers' library does not use a .generate() method.
+        # Instead, you call the model object directly.
+        # It expects a plain list of token IDs, not a PyTorch tensor.
+        input_token_ids = inputs['input_ids'][0].tolist()
         
-        # --- FIX: Pass inputs dictionary and enable sampling ---
-        output_token_ids = self.model.generate(
-            **inputs,
+        output_token_ids = self.model(
+            input_token_ids,
             max_new_tokens=250,
             temperature=0.7,
             top_p=0.95,
             repetition_penalty=1.1,
-            do_sample=True, # Enable sampling
-            pad_token_id=self.tokenizer.eos_token_id # Specify pad token
+            stop_tokens=[self.tokenizer.eos_token_id]
         )
         
-        answer = self.tokenizer.decode(output_token_ids[0][input_len:], skip_special_tokens=True)
+        # The output from ctransformers is only the *newly generated* tokens,
+        # so we can decode it directly without slicing.
+        answer = self.tokenizer.decode(output_token_ids, skip_special_tokens=True)
         
         if not answer:
             answer = "I couldn’t produce a confident answer with the provided context."
