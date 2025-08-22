@@ -3,6 +3,7 @@ import subprocess
 import json
 import time
 import faiss
+import sys
 
 try:
     from sentence_transformers import SentenceTransformer
