@@ -15,6 +15,6 @@ numpy
 scikit-learn
 streamlit
 huggingface_hub
-llama-cpp-python
+optimum
 python-dotenv
 pyarrow
