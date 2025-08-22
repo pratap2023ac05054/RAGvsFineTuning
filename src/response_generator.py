@@ -1,3 +1,5 @@
+# response_generator.py
+
 import os
 import torch
 import streamlit as st
@@ -25,7 +27,6 @@ class ResponseGenerator:
             model_file="mistral-7b-instruct-v0.2.Q4_K_M.gguf",
             model_type="mistral",
             gpu_layers=50 if self.device == "cuda" else 0, # Corrected device check
-            hf=True,
             context_length=CONTEXT_LENGTH
         )
         
