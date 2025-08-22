@@ -10,7 +10,7 @@ import os
 
 from response_generator import ResponseGenerator
 from guardrails import validate_query
-from hybrid_retrieval import retrieve 
+from hybrid_retrieval import retrieve
 
 # --- Configuration ---
 FAISS_INDEX_PATH = "faiss_index.bin"
@@ -39,34 +39,27 @@ def load_components():
         st.error(f"Error loading components: {e}. Please run 'build_indices.py' first.")
         return None
 
+# --- CORRECTED FUNCTION ---
 def generate_directly(generator: ResponseGenerator, query: str):
-    """Generates a response directly from the model without retrieval (zero-shot)."""
+    """
+    Generates a response directly from the ctransformers model.
+    This function now correctly passes a string prompt to the model.
+    """
     start_time = time.time()
     model = generator.model
-    tokenizer = generator.tokenizer
+    # The prompt format should match the model's fine-tuning
     prompt = f"<s>[INST] {query} [/INST]"
-    
-    # --- FIX: Tokenizer returns a dictionary with attention_mask ---
-    inputs = tokenizer(
-        prompt, 
-        return_tensors="pt"
-    ).to(model.device)
-    
-    input_len = inputs['input_ids'].shape[1]
-    
-    # --- FIX: Pass inputs dictionary and enable sampling ---
-    output_token_ids = model.generate(
-        **inputs,
+
+    # ctransformers models are called directly with the prompt string.
+    # It handles tokenization and decoding internally.
+    answer = model(
+        prompt,
         max_new_tokens=250,
         temperature=0.7,
         top_p=0.95,
         repetition_penalty=1.1,
-        do_sample=True, # Enable sampling
-        pad_token_id=tokenizer.eos_token_id # Specify pad token
+        stop=["</s>"] # Use the end-of-sequence token to stop generation
     )
-    
-    # Decode only the newly generated tokens
-    answer = tokenizer.decode(output_token_ids[0][input_len:], skip_special_tokens=True)
 
     end_time = time.time()
     inference_time = end_time - start_time
