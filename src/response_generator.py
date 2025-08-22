@@ -1,6 +1,6 @@
 import os
 import torch
-from dotenv import load_dotenv
+import streamlit as st
 from transformers import AutoTokenizer
 from ctransformers import AutoModelForCausalLM
 
@@ -10,10 +10,11 @@ class ResponseGenerator:
     tokenizer for reliable text processing.
     """
     def __init__(self, model_name: str = "TheBloke/Mistral-7B-Instruct-v0.2-GGUF"):
-        load_dotenv()
-        hf_token = os.getenv("HF_TOKEN")
+        # --- MODIFIED: Read token from Streamlit's secrets ---
+        hf_token = st.secrets.get("HF_TOKEN")
         if not hf_token:
-            print("Warning: Hugging Face token not found.")
+            # Use st.warning for better visibility in the app
+            st.warning("Warning: Hugging Face token not found in Streamlit secrets.")
 
         print(f"Loading generator model '{model_name}'...")
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
