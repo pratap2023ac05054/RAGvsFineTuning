@@ -24,7 +24,7 @@ class ResponseGenerator:
             model_name,
             model_file="mistral-7b-instruct-v0.2.Q4_K_M.gguf",
             model_type="mistral",
-            gpu_layers=50 if self.device == "cuda" else 0, # Corrected device check
+            gpu_layers=50 if self.device == "cuda" else 0,
             hf=True,
             context_length=CONTEXT_LENGTH
         )
@@ -61,11 +61,16 @@ class ResponseGenerator:
             max_length=self.max_positions - 250 # Leave room for generation
         )
 
-        # --- FIX: Correctly call the ctransformers model ---
-        # The 'ctransformers' library does not use a .generate() method.
-        # Instead, you call the model object directly.
-        # It expects a plain list of token IDs, not a PyTorch tensor.
-        input_token_ids = inputs['input_ids'][0].tolist()
+        # --- FIX: Robustly handle tokenizer output ---
+        # The tokenizer might return a 1D tensor (a flat list) or a 2D tensor (a batched list).
+        # We check the dimension (.ndim) to handle both cases correctly.
+        ids_tensor = inputs['input_ids']
+        if ids_tensor.ndim > 1:
+            # It's a batched output (e.g., tensor([[1, 2, 3]])), so select the first item.
+            input_token_ids = ids_tensor[0].tolist()
+        else:
+            # It's a single, flat output (e.g., tensor([1, 2, 3])), so use it directly.
+            input_token_ids = ids_tensor.tolist()
         
         output_token_ids = self.model(
             input_token_ids,
@@ -76,8 +81,6 @@ class ResponseGenerator:
             stop_tokens=[self.tokenizer.eos_token_id]
         )
         
-        # The output from ctransformers is only the *newly generated* tokens,
-        # so we can decode it directly without slicing.
         answer = self.tokenizer.decode(output_token_ids, skip_special_tokens=True)
         
         if not answer:
