@@ -32,7 +32,8 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 
 # --- Configuration ---
-EMBED_MODEL_NAME = "all-MiniLM-L6-v2"
+# MODIFIED: Use the full, explicit Hugging Face model identifier
+EMBED_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
 TOP_N = 10
 RRF_K = 60
 
