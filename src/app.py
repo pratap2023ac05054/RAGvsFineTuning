@@ -19,7 +19,7 @@ BM25_INDEX_PATH = "bm25_index.pkl"
 CHUNK_DATA_PATH = "chunk_data.pkl"
 EMBED_MODEL_NAME = "all-MiniLM-L6-v2"
 BASE_GENERATOR_MODEL = "TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF"
-FINETUNED_ADAPTER_PATH = "./tinyllama-finetuned-adapter-bottleneck" 
+FINETUNED_ADAPTER_PATH = "./tinyllama-finetuned-adapter-cpu" 
 ADAPTER_NAME = "medtronic_qa" # The name given to the adapter during training
 
 # --- Caching ---
