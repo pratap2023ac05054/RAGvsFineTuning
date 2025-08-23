@@ -1,3 +1,5 @@
+# finetune_and_evaluate.py
+
 import json
 import time
 import torch
@@ -14,13 +16,13 @@ from peft import LoraConfig, get_peft_model, PeftModel
 
 # --- Configuration & Hyperparameters ---
 BASE_MODEL = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
-DATASET_PATH = "qapairs/medtronic_qa_training_data.json" # Make sure this path is correct
+DATASET_PATH = "qapairs/medtronic_qa_training_data.json"
 OUTPUT_DIR = "./tinyllama-finetuned-adapter-cpu"
 
-# Hyperparameters for fine-tuning
-LEARNING_RATE = 2e-4
+# Hyperparameters for fine-tuning (UPDATED)
+LEARNING_RATE = 5e-5  # Lowered for more stable training
 BATCH_SIZE = 2
-NUM_EPOCHS = 3
+NUM_EPOCHS = 10       # Increased for more thorough training
 
 # --- Logging Setup ---
 LOG_FILE = "training_log_tinyllama_cpu.txt"
@@ -70,6 +72,7 @@ def generate_response(model, tokenizer, question, device):
     end_time = time.time()
     
     response = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    log_message(f"RAW MODEL OUTPUT: '{response}'") 
     answer = response.split("<|assistant|>")[-1].strip()
     
     inference_speed = end_time - start_time
@@ -121,10 +124,8 @@ def fine_tune(train_data):
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
-    # Load the model in full precision on the CPU
     model = AutoModelForCausalLM.from_pretrained(BASE_MODEL).to(device)
 
-    # Configure LoRA
     lora_config = LoraConfig(
         r=16,
         lora_alpha=32,
@@ -138,7 +139,6 @@ def fine_tune(train_data):
     log_message("\nTrainable Parameters:")
     model.print_trainable_parameters()
 
-    # Prepare dataset
     dataset = Dataset.from_list(train_data)
     def preprocess_function(examples):
         formatted_texts = [
@@ -149,7 +149,6 @@ def fine_tune(train_data):
 
     tokenized_dataset = dataset.map(preprocess_function, batched=True, remove_columns=dataset.column_names)
 
-    # Set up Trainer for CPU
     training_args = TrainingArguments(
         output_dir=OUTPUT_DIR,
         num_train_epochs=NUM_EPOCHS,
@@ -159,7 +158,7 @@ def fine_tune(train_data):
         logging_dir=f"{OUTPUT_DIR}/logs",
         logging_steps=10,
         save_steps=50,
-        optim="adamw_torch", # Standard optimizer for CPU
+        optim="adamw_torch",
     )
     
     trainer = Trainer(
@@ -207,7 +206,9 @@ def main():
     tuned_model = PeftModel.from_pretrained(tuned_model_base, OUTPUT_DIR)
     tuned_tokenizer = AutoTokenizer.from_pretrained(OUTPUT_DIR)
     
-    benchmark_model(tuned_model.merge_and_unload(), tuned_tokenizer, test_data, device, f"Fine-Tuned {BASE_MODEL} with LoRA (CPU)")
+    # Merge the adapter into the base model for evaluation
+    merged_model = tuned_model.merge_and_unload()
+    benchmark_model(merged_model, tuned_tokenizer, test_data, device, f"Fine-Tuned {BASE_MODEL} with LoRA (CPU)")
 
 if __name__ == "__main__":
     main()

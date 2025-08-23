@@ -99,11 +99,8 @@ def generate_from_finetuned(model, tokenizer, query: str):
     scores = outputs.scores
     
     for i, token_id in enumerate(generated_ids):
-        # scores is a tuple of tensors, one for each generation step
         step_scores = scores[i]
-        # Convert logits to probabilities
         step_probs = torch.softmax(step_scores, dim=-1)
-        # Get the probability of the chosen token
         token_prob = step_probs[0, token_id].item()
         token_probs.append(token_prob)
 
@@ -114,43 +111,41 @@ def generate_from_finetuned(model, tokenizer, query: str):
     return answer, inference_time, avg_confidence
 
 def display_results(answer, method, response_time, confidence_score="N/A"):
-    """Displays the generated answer and performance metrics in a consistent format."""
+    """Displays the generated answer and performance metrics."""
     st.subheader("Generated Answer")
     st.markdown(answer)
     st.markdown("---")
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2, col3 = st.columns(3)
     with col1:
-        st.metric(label="Answer", value="") # Placeholder for alignment
-    with col2:
-        st.metric(label="Confidence Score", value=confidence_score)
-    with col3:
         st.metric(label="Method", value=method)
-    with col4:
+    with col2:
         st.metric(label="Inference Time", value=f"{response_time:.2f} s")
+    with col3:
+        st.metric(label="Confidence Score", value=confidence_score)
 
 
 # --- Main App UI ---
 st.set_page_config(page_title="RAG vs. Fine-Tuning", layout="wide")
 st.title("RAG vs. Fine-Tuning Comparison 🤖")
-st.markdown("This interface allows you to compare responses from RAG and a fine-tuned model.")
+st.markdown("This interface allows you to compare responses from a Retrieval-Augmented Generation (RAG) pipeline and a fine-tuned model on Medtronic's financial data.")
 components = load_components()
 
 with st.sidebar:
     st.header("Configuration")
     
-    # Dynamically create radio options
     radio_options = ["RAG (Retrieval-Augmented Generation)"]
     if components and components.get("tuned_model"):
         radio_options.append("Fine-Tuned Model (TinyLlama)")
 
     mode = st.radio(
         "Choose the operational mode:",
-        radio_options
+        radio_options,
+        key="mode_radio"
     )
     st.markdown("---")
     st.info(
-        "**RAG**: Finds relevant documents and uses them to answer.\n\n"
-        "**Fine-Tuned Model**: Answers from knowledge specialized on your Q&A data."
+        "**RAG**: Finds relevant documents from Medtronic's 10-K reports and uses them as context to answer. Best for specific, factual questions.\n\n"
+        "**Fine-Tuned Model**: Answers from knowledge specialized during its training on the Q&A dataset. Best for questions similar to the training data."
     )
 
 if components:
@@ -188,4 +183,4 @@ if components:
                         )
                         display_results(answer, "Fine-Tuned", response_time, confidence_score=f"{confidence:.4f}")
 else:
-    st.error("Application components could not be loaded. Please check the console for errors.")
+    st.error("Application components could not be loaded. Please check the terminal for errors.")
