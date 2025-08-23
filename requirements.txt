@@ -1,16 +1,22 @@
-# requirements.txt
-streamlit
 torch
-sentence-transformers
-faiss-cpu
-# Pin key libraries to ensure consistency
-transformers==4.36.2
-peft==0.7.1
+datasets
 accelerate==0.25.0
-# ---
-ctransformers>=0.2.27
+bitsandbytes
+faiss-cpu
+sentence-transformers
+rank-bm25
+peft==0.7.1
+pdfplumber
+pdf2image
+pytesseract
 nltk
 numpy
-datasets
 scikit-learn
-rank_bm25
+streamlit
+huggingface_hub
+optimum
+python-dotenv
+pyarrow
+transformers==4.36.2
+ctransformers>=0.2.27
+
