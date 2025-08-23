@@ -19,10 +19,10 @@ BASE_MODEL = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
 DATASET_PATH = "qapairs/medtronic_qa_training_data.json"
 OUTPUT_DIR = "./tinyllama-finetuned-adapter-cpu"
 
-# Hyperparameters for fine-tuning (UPDATED)
-LEARNING_RATE = 5e-5  # Lowered for more stable training
+# Hyperparameters for fine-tuning
+LEARNING_RATE = 5e-5
 BATCH_SIZE = 2
-NUM_EPOCHS = 10       # Increased for more thorough training
+NUM_EPOCHS = 10
 
 # --- Logging Setup ---
 LOG_FILE = "training_log_tinyllama_cpu.txt"
@@ -114,11 +114,15 @@ def fine_tune(train_data):
     log_message("WARNING: CPU training is extremely slow. This may take a very long time.")
 
     device = "cpu"
-    log_message(f"Compute Setup: {device.upper()}")
-    log_message(f"Model: {BASE_MODEL}")
-    log_message(f"Learning Rate: {LEARNING_RATE}")
-    log_message(f"Batch Size: {BATCH_SIZE}")
-    log_message(f"Number of Epochs: {NUM_EPOCHS}")
+    
+    # --- ADDED: Log all hyperparameters ---
+    log_message(f"Hyperparameters:")
+    log_message(f"  - Base Model: {BASE_MODEL}")
+    log_message(f"  - Learning Rate: {LEARNING_RATE}")
+    log_message(f"  - Batch Size: {BATCH_SIZE}")
+    log_message(f"  - Number of Epochs: {NUM_EPOCHS}")
+    log_message(f"  - Compute Setup: {device.upper()}")
+    # -----------------------------------------
     
     tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL)
     if tokenizer.pad_token is None:

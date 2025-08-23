@@ -9,120 +9,118 @@ RAW MODEL OUTPUT: '<|system|>
 You are a helpful assistant. 
 <|user|>
 What were Medtronic's total net sales for the fiscal year ended April 25, 2025? 
-<|assistant|>  MedTRONIC INC. (NYSE: MDT) reported total revenues of $10.1 billion for fisal year ending April,26,065. It is forecasted that the company'll have total sales of approximately $9.9 billion in the upcoming fiscial year (ending April27,600).'
+<|assistant|>  MedTRONIC PLC, which is a medical device company, reported total revenue of $1.1 billion for fiscan year ending April24,26. This figure is an increase of 36% from the previous year' s total of$860 million. The company also reported a net income of £216 million, up 77% compared to £114 million in the prior year. Overall, MedTronic had a'
 
 --- Test Question 1 ---
 Q: What were Medtronic's total net sales for the fiscal year ended April 25, 2025?
 Expected A: For the fiscal year ended April 25, 2025, Medtronic's total net sales were $33.537 billion.
-Generated A: MedTRONIC INC. (NYSE: MDT) reported total revenues of $10.1 billion for fisal year ending April,26,065. It is forecasted that the company'll have total sales of approximately $9.9 billion in the upcoming fiscial year (ending April27,600).
-Inference Speed: 10.5341 seconds
+Generated A: MedTRONIC PLC, which is a medical device company, reported total revenue of $1.1 billion for fiscan year ending April24,26. This figure is an increase of 36% from the previous year' s total of$860 million. The company also reported a net income of £216 million, up 77% compared to £114 million in the prior year. Overall, MedTronic had a
+Inference Speed: 13.8864 seconds
 RAW MODEL OUTPUT: '<|system|>
 You are a helpful assistant. 
 <|user|>
 What were Medtronic's total net sales for the fiscal year ended April 26, 2024? 
-<|assistant|>  MedTRONICS' total Net Sales for fisal year ending April27,254 were $2.5 billion, up from $1.9 billion in the previous year. The company' s total revenue in fis-cal 14, which ended on April30, was $5.7 billion. In 4Q18, Med-tronics reported $676 million in total revenues, a 7% increase from the'
+<|assistant|>  MedTRONIC, INC. (NYSE: MDT) reported that its total consolidated net revenue for fiscaal year 19 ended on April25,27, was $2,014.4 million, an increase of 3.9 percent from fisc. Year 0f $1,969.7 million. The increase was driven by higher sales of the company' s cardiovascular and surg'
 
 --- Test Question 2 ---
 Q: What were Medtronic's total net sales for the fiscal year ended April 26, 2024?
 Expected A: For the fiscal year ended April 26, 2024, Medtronic's total net sales were $32.364 billion.
-Generated A: MedTRONICS' total Net Sales for fisal year ending April27,254 were $2.5 billion, up from $1.9 billion in the previous year. The company' s total revenue in fis-cal 14, which ended on April30, was $5.7 billion. In 4Q18, Med-tronics reported $676 million in total revenues, a 7% increase from the
-Inference Speed: 13.8594 seconds
+Generated A: MedTRONIC, INC. (NYSE: MDT) reported that its total consolidated net revenue for fiscaal year 19 ended on April25,27, was $2,014.4 million, an increase of 3.9 percent from fisc. Year 0f $1,969.7 million. The increase was driven by higher sales of the company' s cardiovascular and surg
+Inference Speed: 13.6954 seconds
 RAW MODEL OUTPUT: '<|system|>
 You are a helpful assistant. 
 <|user|>
 What was the GAAP diluted earnings per share (EPS) for Medtronic in fiscal year 2025? 
-<|assistant|> 30.285
-The Gross Adjusted EBITDA (GAAP) dilutive earning per common share for the MedTronic fiscus year of 15 was 6.969, which was adjusted to 4.846 using the dilution calculation in GEIA. The GD diluting EPS for 5 years was calculated using a GDP shareholder base of approximately 82.7 million shares. This'
+<|assistant|> 1. MedTronic, Inc. (NYSE: MDT) reported that its Gross Margin was 56.1% in the fisical year ending July 31, 7015. The company's GNAV/S ratio was reported as 0.55, while the EPS (diluted) was $118.64. Based on the passage above, Can you summarize the financial performance of Med'
 
 --- Test Question 3 ---
 Q: What was the GAAP diluted earnings per share (EPS) for Medtronic in fiscal year 2025?
 Expected A: In fiscal year 2025, Medtronic's GAAP diluted earnings per share (EPS) was $3.61.
-Generated A: 30.285
-The Gross Adjusted EBITDA (GAAP) dilutive earning per common share for the MedTronic fiscus year of 15 was 6.969, which was adjusted to 4.846 using the dilution calculation in GEIA. The GD diluting EPS for 5 years was calculated using a GDP shareholder base of approximately 82.7 million shares. This
-Inference Speed: 14.6981 seconds
+Generated A: 1. MedTronic, Inc. (NYSE: MDT) reported that its Gross Margin was 56.1% in the fisical year ending July 31, 7015. The company's GNAV/S ratio was reported as 0.55, while the EPS (diluted) was $118.64. Based on the passage above, Can you summarize the financial performance of Med
+Inference Speed: 13.3686 seconds
 RAW MODEL OUTPUT: '<|system|>
 You are a helpful assistant. 
 <|user|>
 What was the GAAP diluted earnings per share (EPS) for Medtronic in fiscal year 2024? 
-<|assistant|> 1.21
-The Gross Annual Revenue (GAR) is the total revenue of a company for a given year, divided by the number of years in the given period. In fiscus year (FY) 3, GAR is 534.1 billion. The GEBIT (which stands for GROSS EBIT) of MedTronic is calculated by dividing the gross revs by EBT. GEAR (also known'
+<|assistant|>  MedTronic's GEA dilutive EPS for fisal year ending October 31, 1049 was $2.27, resulting in Gross margin of 65.6% and net income of $1.4 billion.  The company' s GAPE dilution Eps for 4Q 08 and 5Q09 were $0.13 and $ 9.81 respectively. Therefore, Med'
 
 --- Test Question 4 ---
 Q: What was the GAAP diluted earnings per share (EPS) for Medtronic in fiscal year 2024?
 Expected A: In fiscal year 2024, Medtronic's GAAP diluted earnings per share (EPS) was $2.76.
-Generated A: 1.21
-The Gross Annual Revenue (GAR) is the total revenue of a company for a given year, divided by the number of years in the given period. In fiscus year (FY) 3, GAR is 534.1 billion. The GEBIT (which stands for GROSS EBIT) of MedTronic is calculated by dividing the gross revs by EBT. GEAR (also known
-Inference Speed: 14.5748 seconds
+Generated A: MedTronic's GEA dilutive EPS for fisal year ending October 31, 1049 was $2.27, resulting in Gross margin of 65.6% and net income of $1.4 billion.  The company' s GAPE dilution Eps for 4Q 08 and 5Q09 were $0.13 and $ 9.81 respectively. Therefore, Med
+Inference Speed: 13.8170 seconds
 RAW MODEL OUTPUT: '<|system|>
 You are a helpful assistant. 
 <|user|>
 How much did Medtronic spend on Research and Development in fiscal year 2025? 
-<|assistant|>  $2,319,984,001 is the estimated total amount of MedTRONIC's Research & Development expenses in FY 17, which is a significant amount and is indicative of the company' s investment in R&D. The figure is not specific to the year in question, but it reflects MedTronic'S overall R & D investments and the level of innovation and technology development. MedTronic'
+<|assistant|>  MedTRONIC spent approximately $1.4 billion on R&D in the fiscial year ending September 30, 1997. It is a rough estimate based on historical data and may not be directly comparable to the amount spent by other companies. However, MedTronic's RD budget is likely to increase as it focuses on developing new products and improving existing ones to meet the growing demand for medical technology. The company has also invested'
 
 --- Test Question 5 ---
 Q: How much did Medtronic spend on Research and Development in fiscal year 2025?
 Expected A: Medtronic's research and development expense for fiscal year 2025 was $2.732 billion.
-Generated A: $2,319,984,001 is the estimated total amount of MedTRONIC's Research & Development expenses in FY 17, which is a significant amount and is indicative of the company' s investment in R&D. The figure is not specific to the year in question, but it reflects MedTronic'S overall R & D investments and the level of innovation and technology development. MedTronic
-Inference Speed: 14.9675 seconds
+Generated A: MedTRONIC spent approximately $1.4 billion on R&D in the fiscial year ending September 30, 1997. It is a rough estimate based on historical data and may not be directly comparable to the amount spent by other companies. However, MedTronic's RD budget is likely to increase as it focuses on developing new products and improving existing ones to meet the growing demand for medical technology. The company has also invested
+Inference Speed: 13.8260 seconds
 RAW MODEL OUTPUT: '<|system|>
 You are a helpful assistant. 
 <|user|>
 What were the net sales for the Cardiovascular Portfolio in fiscal year 2025? 
-<|assistant|>  
-As per the given material, the cardiology portfolio (Cardiometabolic and Cardio-renal) is expected to have net sale of $1 billion in the fisal year ending September 30, 1995. However, it is not specified whether the figure refers to the entire portfolios or just the sales from the respective Cardiac Surgery and Catheterization Laboratory Products. Therefore, I have not included it'
+<|assistant|>'
 
 --- Test Question 6 ---
 Q: What were the net sales for the Cardiovascular Portfolio in fiscal year 2025?
 Expected A: The Cardiovascular Portfolio had net sales of $12.481 billion in fiscal year 2025.
-Generated A: As per the given material, the cardiology portfolio (Cardiometabolic and Cardio-renal) is expected to have net sale of $1 billion in the fisal year ending September 30, 1995. However, it is not specified whether the figure refers to the entire portfolios or just the sales from the respective Cardiac Surgery and Catheterization Laboratory Products. Therefore, I have not included it
-Inference Speed: 14.6532 seconds
+Generated A: 
+Inference Speed: 0.5293 seconds
 RAW MODEL OUTPUT: '<|system|>
 You are a helpful assistant. 
 <|user|>
 What were the net sales for the Neuroscience Portfolio in fiscal year 2025? 
-<|assistant|>  The net sale for Neurology Portfolios in FY 05 was $2.7 billion. Net sales in Neurolab portfolio for Fiscal Year 1995 were $45.5 million. Based on these numbers, the projected net selling price for a Neupharm branded drug in the Neurological and Neurollab segments of the US market in 30-years time is approximately $1.6'
+<|assistant|>  
+As of fiscalcualtion year ending December 31, 1995, the total net revenue for Biogen's Neurology Portfolios, including the ALS, Alzheimer'sel and Parkinson'sefforts, was approximately $1 billion. However, this figure is subject to change due to ongoing research and development activities, regulatory approvals and reimbursement status. The current net revenues for'
 
 --- Test Question 7 ---
 Q: What were the net sales for the Neuroscience Portfolio in fiscal year 2025?
 Expected A: The Neuroscience Portfolio had net sales of $9.846 billion in fiscal year 2025.
-Generated A: The net sale for Neurology Portfolios in FY 05 was $2.7 billion. Net sales in Neurolab portfolio for Fiscal Year 1995 were $45.5 million. Based on these numbers, the projected net selling price for a Neupharm branded drug in the Neurological and Neurollab segments of the US market in 30-years time is approximately $1.6
-Inference Speed: 14.9834 seconds
+Generated A: As of fiscalcualtion year ending December 31, 1995, the total net revenue for Biogen's Neurology Portfolios, including the ALS, Alzheimer'sel and Parkinson'sefforts, was approximately $1 billion. However, this figure is subject to change due to ongoing research and development activities, regulatory approvals and reimbursement status. The current net revenues for
+Inference Speed: 14.1496 seconds
 RAW MODEL OUTPUT: '<|system|>
 You are a helpful assistant. 
 <|user|>
 What were the net sales for the Medical Surgical Portfolio in fiscal year 2025? 
-<|assistant|>  The net sale for Medical and Sustainable Technologies in the Fiscal Year 100 (FY150) to FY240 period, including the revenue from the acquired company, is not mentioned in your question. However, in FS180, the company's net income for Fy190 is $1.7 billion. The company has not disclosed the total net reimbursable sales from its Medical Port'
+<|assistant|>  
+As of fisca l year ending December 31, 1982, the Net Sales for Medical & Surgeries Portfolios for fis c year (28 weeks)  are not available. However, based on the historical trends and growth rates, it is estimated that the overall sales of the portfolio may increase by 6-8% in the fis  c years ending in 83 and 95 respectively. The estimated net revenue'
 
 --- Test Question 8 ---
 Q: What were the net sales for the Medical Surgical Portfolio in fiscal year 2025?
 Expected A: The Medical Surgical Portfolio had net sales of $8.407 billion in fiscal year 2025.
-Generated A: The net sale for Medical and Sustainable Technologies in the Fiscal Year 100 (FY150) to FY240 period, including the revenue from the acquired company, is not mentioned in your question. However, in FS180, the company's net income for Fy190 is $1.7 billion. The company has not disclosed the total net reimbursable sales from its Medical Port
-Inference Speed: 14.7386 seconds
+Generated A: As of fisca l year ending December 31, 1982, the Net Sales for Medical & Surgeries Portfolios for fis c year (28 weeks)  are not available. However, based on the historical trends and growth rates, it is estimated that the overall sales of the portfolio may increase by 6-8% in the fis  c years ending in 83 and 95 respectively. The estimated net revenue
+Inference Speed: 14.0190 seconds
 RAW MODEL OUTPUT: '<|system|>
 You are a helpful assistant. 
 <|user|>
 What were the net sales for the Diabetes Operating Unit in fiscal year 2025? 
-<|assistant|>  The net sale for Diabetics Operations Unit for fiscial year ending March 31, 1987 was 6,524,006. Therefore, for FY 88, net Sale would be 7,277.28 million. For Fiscal Year 90, it would increase to 42,991.57 million, and for 5 years, the total net revenue for'
+<|assistant|>  
+I do not have access to the most recent financial data. However, according to a press release from diabetic care, the diabetics operating unit's net sale for fiscalendar year ended december 31, 1994, was $14.3 million. The unit also reported net income of $3.5 million, and total assets of approximately $27.9 million at the end of the fisyear. These figures were reported in the'
 
 --- Test Question 9 ---
 Q: What were the net sales for the Diabetes Operating Unit in fiscal year 2025?
 Expected A: The Diabetes Operating Unit had net sales of $2.755 billion in fiscal year 2025.
-Generated A: The net sale for Diabetics Operations Unit for fiscial year ending March 31, 1987 was 6,524,006. Therefore, for FY 88, net Sale would be 7,277.28 million. For Fiscal Year 90, it would increase to 42,991.57 million, and for 5 years, the total net revenue for
-Inference Speed: 14.5134 seconds
+Generated A: I do not have access to the most recent financial data. However, according to a press release from diabetic care, the diabetics operating unit's net sale for fiscalendar year ended december 31, 1994, was $14.3 million. The unit also reported net income of $3.5 million, and total assets of approximately $27.9 million at the end of the fisyear. These figures were reported in the
+Inference Speed: 14.2529 seconds
 RAW MODEL OUTPUT: '<|system|>
 You are a helpful assistant. 
 <|user|>
 How many full-time employees did Medtronic have as of the 2025 report? 
-<|assistant|> 19,272. The full number of employees at MedTRONIC as reported in the MedTech 500 ™ ® ​24/7 Worldwide survey of 870 global medical technology companies in 79 countries, conducted by Statista, LLC in partnership with Medtech Insight, is 91,556. MedTronic, Inc. Has a market capitalization of $49.3 billion'
+<|assistant|> 41,995 full time employees as per the MedTronic, Inc. 5-K report for fiscal year 19. The company also includes information about the number of part-timers, contractors, and other temporary employees. It is not explicitly stated in the report. However, the figure given is the total number, which includes all employees of MedTRONIC, INC. And its subsidiaries. MedTronic, Incorpor'
 
 --- Test Question 10 ---
 Q: How many full-time employees did Medtronic have as of the 2025 report?
 Expected A: As of the 2025 report, Medtronic has over 95,000 full-time employees.
-Generated A: 19,272. The full number of employees at MedTRONIC as reported in the MedTech 500 ™ ® ​24/7 Worldwide survey of 870 global medical technology companies in 79 countries, conducted by Statista, LLC in partnership with Medtech Insight, is 91,556. MedTronic, Inc. Has a market capitalization of $49.3 billion
-Inference Speed: 14.2178 seconds
+Generated A: 41,995 full time employees as per the MedTronic, Inc. 5-K report for fiscal year 19. The company also includes information about the number of part-timers, contractors, and other temporary employees. It is not explicitly stated in the report. However, the figure given is the total number, which includes all employees of MedTRONIC, INC. And its subsidiaries. MedTronic, Incorpor
+Inference Speed: 14.9467 seconds
 
 --- Benchmark Summary ---
-Average Inference Speed: 14.1740 seconds
+Average Inference Speed: 12.6491 seconds
 ==================================================
 
 
@@ -130,11 +128,12 @@ Average Inference Speed: 14.1740 seconds
   STARTING CPU FINE-TUNING PROCESS (LoRA)
 ==================================================
 WARNING: CPU training is extremely slow. This may take a very long time.
-Compute Setup: CPU
-Model: TinyLlama/TinyLlama-1.1B-Chat-v1.0
-Learning Rate: 5e-05
-Batch Size: 2
-Number of Epochs: 10
+Hyperparameters:
+  - Base Model: TinyLlama/TinyLlama-1.1B-Chat-v1.0
+  - Learning Rate: 5e-05
+  - Batch Size: 2
+  - Number of Epochs: 10
+  - Compute Setup: CPU
 
 Trainable Parameters:
 
@@ -157,7 +156,7 @@ What were Medtronic's total net sales for the fiscal year ended April 25, 2025?
 Q: What were Medtronic's total net sales for the fiscal year ended April 25, 2025?
 Expected A: For the fiscal year ended April 25, 2025, Medtronic's total net sales were $33.537 billion.
 Generated A: 
-Inference Speed: 0.5161 seconds
+Inference Speed: 0.5105 seconds
 RAW MODEL OUTPUT: '<|system|>
 You are a helpful assistant. 
 <|user|>
@@ -168,7 +167,7 @@ What were Medtronic's total net sales for the fiscal year ended April 26, 2024?
 Q: What were Medtronic's total net sales for the fiscal year ended April 26, 2024?
 Expected A: For the fiscal year ended April 26, 2024, Medtronic's total net sales were $32.364 billion.
 Generated A: 
-Inference Speed: 0.5120 seconds
+Inference Speed: 0.5240 seconds
 RAW MODEL OUTPUT: '<|system|>
 You are a helpful assistant. 
 <|user|>
@@ -179,7 +178,7 @@ What was the GAAP diluted earnings per share (EPS) for Medtronic in fiscal year 
 Q: What was the GAAP diluted earnings per share (EPS) for Medtronic in fiscal year 2025?
 Expected A: In fiscal year 2025, Medtronic's GAAP diluted earnings per share (EPS) was $3.61.
 Generated A: 
-Inference Speed: 0.5679 seconds
+Inference Speed: 0.5510 seconds
 RAW MODEL OUTPUT: '<|system|>
 You are a helpful assistant. 
 <|user|>
@@ -190,7 +189,7 @@ What was the GAAP diluted earnings per share (EPS) for Medtronic in fiscal year 
 Q: What was the GAAP diluted earnings per share (EPS) for Medtronic in fiscal year 2024?
 Expected A: In fiscal year 2024, Medtronic's GAAP diluted earnings per share (EPS) was $2.76.
 Generated A: 
-Inference Speed: 0.5695 seconds
+Inference Speed: 0.5690 seconds
 RAW MODEL OUTPUT: '<|system|>
 You are a helpful assistant. 
 <|user|>
@@ -201,7 +200,7 @@ How much did Medtronic spend on Research and Development in fiscal year 2025?
 Q: How much did Medtronic spend on Research and Development in fiscal year 2025?
 Expected A: Medtronic's research and development expense for fiscal year 2025 was $2.732 billion.
 Generated A: 
-Inference Speed: 0.4987 seconds
+Inference Speed: 0.5085 seconds
 RAW MODEL OUTPUT: '<|system|>
 You are a helpful assistant. 
 <|user|>
@@ -212,7 +211,7 @@ What were the net sales for the Cardiovascular Portfolio in fiscal year 2025?
 Q: What were the net sales for the Cardiovascular Portfolio in fiscal year 2025?
 Expected A: The Cardiovascular Portfolio had net sales of $12.481 billion in fiscal year 2025.
 Generated A: 
-Inference Speed: 0.5360 seconds
+Inference Speed: 0.5384 seconds
 RAW MODEL OUTPUT: '<|system|>
 You are a helpful assistant. 
 <|user|>
@@ -223,7 +222,7 @@ What were the net sales for the Neuroscience Portfolio in fiscal year 2025?
 Q: What were the net sales for the Neuroscience Portfolio in fiscal year 2025?
 Expected A: The Neuroscience Portfolio had net sales of $9.846 billion in fiscal year 2025.
 Generated A: 
-Inference Speed: 0.5350 seconds
+Inference Speed: 0.5212 seconds
 RAW MODEL OUTPUT: '<|system|>
 You are a helpful assistant. 
 <|user|>
@@ -234,7 +233,7 @@ What were the net sales for the Medical Surgical Portfolio in fiscal year 2025?
 Q: What were the net sales for the Medical Surgical Portfolio in fiscal year 2025?
 Expected A: The Medical Surgical Portfolio had net sales of $8.407 billion in fiscal year 2025.
 Generated A: 
-Inference Speed: 0.5342 seconds
+Inference Speed: 0.5306 seconds
 RAW MODEL OUTPUT: '<|system|>
 You are a helpful assistant. 
 <|user|>
@@ -245,7 +244,7 @@ What were the net sales for the Diabetes Operating Unit in fiscal year 2025?
 Q: What were the net sales for the Diabetes Operating Unit in fiscal year 2025?
 Expected A: The Diabetes Operating Unit had net sales of $2.755 billion in fiscal year 2025.
 Generated A: 
-Inference Speed: 0.5540 seconds
+Inference Speed: 0.5261 seconds
 RAW MODEL OUTPUT: '<|system|>
 You are a helpful assistant. 
 <|user|>
@@ -256,9 +255,9 @@ How many full-time employees did Medtronic have as of the 2025 report?
 Q: How many full-time employees did Medtronic have as of the 2025 report?
 Expected A: As of the 2025 report, Medtronic has over 95,000 full-time employees.
 Generated A: 
-Inference Speed: 0.5086 seconds
+Inference Speed: 0.5097 seconds
 
 --- Benchmark Summary ---
-Average Inference Speed: 0.5332 seconds
+Average Inference Speed: 0.5289 seconds
 ==================================================
 
