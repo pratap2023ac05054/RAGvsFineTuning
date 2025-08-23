@@ -2,13 +2,10 @@
 
 import streamlit as st
 import time
-import torch
-from sentence_transformers import SentenceTransformer
 import faiss
 import pickle
 import os
-from transformers import AutoModelForCausalLM, AutoTokenizer
-from peft import PeftModel
+from sentence_transformers import SentenceTransformer
 
 from response_generator import ResponseGenerator
 from guardrails import validate_query
@@ -20,13 +17,12 @@ BM25_INDEX_PATH = "bm25_index.pkl"
 CHUNK_DATA_PATH = "chunk_data.pkl"
 EMBED_MODEL_NAME = "all-MiniLM-L6-v2"
 BASE_GENERATOR_MODEL = "TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF"
-FINETUNED_ADAPTER_PATH = "./tinyllama-finetuned-adapter-cpu" # Path to your fine-tuned adapter
 
 # --- Caching ---
 @st.cache_resource
 def load_components():
-    """Loads all necessary models and data."""
-    print("Loading components...")
+    """Loads all necessary models and data for the RAG pipeline."""
+    print("Loading RAG components...")
     components = {}
     try:
         # Load RAG components
@@ -40,112 +36,40 @@ def load_components():
         # Load Base GGUF Model for RAG
         components["base_generator"] = ResponseGenerator(model_name=BASE_GENERATOR_MODEL)
 
-        # Load Fine-Tuned Model
-        if os.path.exists(FINETUNED_ADAPTER_PATH):
-            print(f"Loading fine-tuned model from {FINETUNED_ADAPTER_PATH}...")
-            base_model_name = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
-            
-            base_model = AutoModelForCausalLM.from_pretrained(base_model_name)
-            tuned_model = PeftModel.from_pretrained(base_model, FINETUNED_ADAPTER_PATH)
-            tuned_model = tuned_model.merge_and_unload() # Merge adapter for faster inference
-            
-            components["tuned_model"] = tuned_model
-            components["tuned_tokenizer"] = AutoTokenizer.from_pretrained(FINETUNED_ADAPTER_PATH)
-            print("Fine-tuned model loaded.")
-        else:
-            st.warning(f"Fine-tuned model adapter not found at '{FINETUNED_ADAPTER_PATH}'. The fine-tuned option will be disabled.")
-            components["tuned_model"] = None
-
-        print("All components loaded.")
+        print("All RAG components loaded successfully.")
         return components
+        
     except FileNotFoundError as e:
-        st.error(f"Error loading components: {e}. Please run 'build_indices.py' first.")
+        st.error(f"Error loading components: {e}. Please ensure index files are present.")
         return None
     except Exception as e:
-        st.error(f"An error occurred while loading components: {e}")
+        st.error(f"An unexpected error occurred while loading components: {e}")
         return None
 
-def generate_from_finetuned(model, tokenizer, query: str):
-    """Generates a response and calculates a confidence score."""
-    start_time = time.time()
-    device = "cpu"
-    model.to(device)
-    
-    prompt = (
-        f"<|system|>\nYou are a helpful assistant.</s>\n"
-        f"<|user|>\n{query}</s>\n"
-        f"<|assistant|>"
-    )
-    
-    inputs = tokenizer(prompt, return_tensors="pt").to(device)
-    
-    with torch.no_grad():
-        outputs = model.generate(
-            **inputs,
-            max_new_tokens=250,
-            do_sample=True,
-            temperature=0.7,
-            top_p=0.9,
-            output_scores=True, # Request scores for confidence calculation
-            return_dict_in_generate=True
-        )
-    
-    response = tokenizer.decode(outputs.sequences[0], skip_special_tokens=True)
-    answer = response.split("<|assistant|>")[-1].strip()
-
-    # Calculate confidence score as the average probability of the generated tokens
-    token_probs = []
-    generated_ids = outputs.sequences[0, inputs.input_ids.shape[-1]:]
-    scores = outputs.scores
-    
-    for i, token_id in enumerate(generated_ids):
-        step_scores = scores[i]
-        step_probs = torch.softmax(step_scores, dim=-1)
-        token_prob = step_probs[0, token_id].item()
-        token_probs.append(token_prob)
-
-    avg_confidence = sum(token_probs) / len(token_probs) if token_probs else 0
-
-    end_time = time.time()
-    inference_time = end_time - start_time
-    return answer, inference_time, avg_confidence
-
-def display_results(answer, method, response_time, confidence_score="N/A"):
+def display_results(answer, response_time, confidence_score="N/A"):
     """Displays the generated answer and performance metrics."""
     st.subheader("Generated Answer")
     st.markdown(answer)
     st.markdown("---")
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.metric(label="Method", value=method)
+        st.metric(label="Method", value="RAG")
     with col2:
         st.metric(label="Inference Time", value=f"{response_time:.2f} s")
     with col3:
-        st.metric(label="Confidence Score", value=confidence_score)
+        st.metric(label="Top Document Score", value=confidence_score)
 
 
 # --- Main App UI ---
-st.set_page_config(page_title="RAG vs. Fine-Tuning", layout="wide")
-st.title("RAG vs. Fine-Tuning Comparison 🤖")
-st.markdown("This interface allows you to compare responses from a Retrieval-Augmented Generation (RAG) pipeline and a fine-tuned model on Medtronic's financial data.")
+st.set_page_config(page_title="Medtronic 10-K RAG System", layout="wide")
+st.title("Medtronic 10-K RAG System 🤖")
+st.markdown("This application uses a Retrieval-Augmented Generation (RAG) pipeline to answer questions based on Medtronic's financial reports.")
 components = load_components()
 
 with st.sidebar:
-    st.header("Configuration")
-    
-    radio_options = ["RAG (Retrieval-Augmented Generation)"]
-    if components and components.get("tuned_model"):
-        radio_options.append("Fine-Tuned Model (TinyLlama)")
-
-    mode = st.radio(
-        "Choose the operational mode:",
-        radio_options,
-        key="mode_radio"
-    )
-    st.markdown("---")
+    st.header("About")
     st.info(
-        "**RAG**: Finds relevant documents from Medtronic's 10-K reports and uses them as context to answer. Best for specific, factual questions.\n\n"
-        "**Fine-Tuned Model**: Answers from knowledge specialized during its training on the Q&A dataset. Best for questions similar to the training data."
+        "This system finds relevant documents from Medtronic's 10-K reports using a hybrid search algorithm and then uses a language model to generate a natural language answer."
     )
 
 if components:
@@ -158,29 +82,32 @@ if components:
             if not is_valid:
                 st.error(f"Input Error: {message}")
             else:
-                if mode == "RAG (Retrieval-Augmented Generation)":
-                    with st.spinner("Processing with the RAG pipeline..."):
-                        start_time = time.time()
-                        retrieved_chunks = retrieve(
-                            query,
-                            components["embed_model"],
-                            components["faiss_index"],
-                            components["bm25_index"],
-                            components["chunk_data"]
-                        )
-                        final_answer = components["base_generator"].generate(query, retrieved_chunks)
-                        end_time = time.time()
-                        response_time = end_time - start_time
-                        confidence = f"{retrieved_chunks[0]['score']:.4f}" if retrieved_chunks else "N/A"
-                        display_results(final_answer, "RAG", response_time, confidence)
+                with st.spinner("Processing with the RAG pipeline..."):
+                    start_time = time.time()
+                    
+                    retrieved_chunks = retrieve(
+                        query,
+                        components["embed_model"],
+                        components["faiss_index"],
+                        components["bm25_index"],
+                        components["chunk_data"]
+                    )
+                    
+                    final_answer = components["base_generator"].generate(query, retrieved_chunks)
+                    
+                    end_time = time.time()
+                    response_time = end_time - start_time
+                    
+                    # Use the RRF score of the top retrieved chunk as the confidence score
+                    top_score = f"{retrieved_chunks[0]['score']:.4f}" if retrieved_chunks else "N/A"
+                    
+                    display_results(final_answer, response_time, top_score)
 
-                elif mode == "Fine-Tuned Model (TinyLlama)":
-                    with st.spinner("Querying the fine-tuned model..."):
-                        answer, response_time, confidence = generate_from_finetuned(
-                            components["tuned_model"],
-                            components["tuned_tokenizer"],
-                            query
-                        )
-                        display_results(answer, "Fine-Tuned", response_time, confidence_score=f"{confidence:.4f}")
+                    # Display the sources used for the answer
+                    st.subheader("Sources")
+                    for i, chunk in enumerate(retrieved_chunks[:3]): # Show top 3 sources
+                        with st.expander(f"Source {i+1} (Score: {chunk['score']:.4f})"):
+                            st.markdown(chunk['text'])
+
 else:
     st.error("Application components could not be loaded. Please check the terminal for errors.")
