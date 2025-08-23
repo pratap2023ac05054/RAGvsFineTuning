@@ -1,0 +1,90 @@
+Loading dataset from: qapairs/medtronic_qa_training_data.json
+Using 50 samples for training.
+Using the first 10 samples for benchmarking.
+
+==================================================
+  BENCHMARKING: Pre-trained TinyLlama/TinyLlama-1.1B-Chat-v1.0 (4-bit)
+==================================================
+
+--- Test Question 1 ---
+Q: What were Medtronic's total net sales for the fiscal year ended April 25, 2025?
+Expected A: For the fiscal year ended April 25, 2025, Medtronic's total net sales were $33.537 billion.
+Generated A: MedTronic reported total sales of $11.4 billion for fiscan 15. The fisan 50 is not available in the given text. However, the total fisanal 40 net income for 3Q24 was $2.2 billion, which is the same as the net profit for Q323. MedTronic' s fisana 00 sales were $3 billion in 9M22, and the company'
+Inference Speed: 316.6385 seconds
+
+--- Test Question 2 ---
+Q: What were Medtronic's total net sales for the fiscal year ended April 26, 2024?
+Expected A: For the fiscal year ended April 26, 2024, Medtronic's total net sales were $32.364 billion.
+Generated A: MedTronic reported total sales of $11.4 billion for fiscan 1/25/14 to 3/31, ending in April, according to the company' s earnings release. The total includes MedTronic'S net income of approximately $2.2 billion, or $0.50 per diluted share. This is a 4% increase from the previous fisca/05 to fis/55, and a decrease
+Inference Speed: 319.1996 seconds
+
+--- Test Question 3 ---
+Q: What was the GAAP diluted earnings per share (EPS) for Medtronic in fiscal year 2025?
+Expected A: In fiscal year 2025, Medtronic's GAAP diluted earnings per share (EPS) was $3.61.
+Generated A: In fiscial year (FY) 19, MedTronic reported G&A expenses of $1.2 billion, which is the same as the $2.4 billion reported in FY 30. Therefore, in the future, the company's Gross margin (G&M) will be 50%, which means that the net income (NI) per dilution will remain the exact same. In Fiscal Year 40, G
+Inference Speed: 324.2737 seconds
+
+--- Test Question 4 ---
+Q: What was the GAAP diluted earnings per share (EPS) for Medtronic in fiscal year 2024?
+Expected A: In fiscal year 2024, Medtronic's GAAP diluted earnings per share (EPS) was $2.76.
+Generated A: In fiscial year (FY) 19, MedTronic reported G&A expenses of $1.2 billion, which is the same as the previous year. MedTronic's Gross margin for FY18 was 61%, which was a decrease from the prior year' s 70%. MedTRONIC'S GUIDANCE FOR FISCAL 3/21/17-2/01-1
+Inference Speed: 333.3186 seconds
+
+--- Test Question 5 ---
+Q: How much did Medtronic spend on Research and Development in fiscal year 2025?
+Expected A: Medtronic's research and development expense for fiscal year 2025 was $2.732 billion.
+Generated A: $1.2 billion
+
+The figure of $0.0 billion is the total amount spent on research and development by MedTronic in the fiscial year of 1995. The amount has been updated to $2.1 billion in 30th September 00, 5th January 97, and 4th July 89.
+This information is available in MedTronics' 6-K filing with the SEC
+Inference Speed: 332.3446 seconds
+
+--- Test Question 6 ---
+Q: What were the net sales for the Cardiovascular Portfolio in fiscal year 2025?
+Expected A: The Cardiovascular Portfolio had net sales of $12.481 billion in fiscal year 2025.
+Generated A: The net sale for CardioPort's Cardiac Valves and Cardiopulmonary Devices portfolio for fiscial year (FY) 15 was $1.2 billion. This includes the sale of the company' s Cardiosense business to Medtronic for $2.1 billion in 4Q FY14. The Cardiotronics portfolios were sold to Cardionetics for a total of $300 million in Q
+Inference Speed: 332.6070 seconds
+
+--- Test Question 7 ---
+Q: What were the net sales for the Neuroscience Portfolio in fiscal year 2025?
+Expected A: The Neuroscience Portfolio had net sales of $9.846 billion in fiscal year 2025.
+Generated A: The net sale for Neuoscience in FY21 was $1.2 billion. The Neuroscsiy Portoflio is a portfolio of products and services that are focused on the neurosciences. It includes products such as neurostimulators, neuropathic pain therapies, and neonatal care products. These products are used in a variety of applications, including pain management, spinal cord stimulation, epilepsy,
+Inference Speed: 332.1516 seconds
+
+--- Test Question 8 ---
+Q: What were the net sales for the Medical Surgical Portfolio in fiscal year 2025?
+Expected A: The Medical Surgical Portfolio had net sales of $8.407 billion in fiscal year 2025.
+Generated A: The net sale for Medical and Surgeries Portfolios in Fiscal Year 1926 is not specified in the given text. The information provided is for FY 06-10.
+
+The Medical & Surcharges Portion of the portfolio is expected to be sold in 3rd quarter of FS 500, and the sale is likely to close in Q4 of that year. Based on the passage, it is assumed
+Inference Speed: 332.5856 seconds
+
+--- Test Question 9 ---
+Q: What were the net sales for the Diabetes Operating Unit in fiscal year 2025?
+Expected A: The Diabetes Operating Unit had net sales of $2.755 billion in fiscal year 2025.
+Generated A: The net sale for Diabetics Operational Unit (Diabetic Operations Unit) in Fiscal Year 1 (21-22) is not specified in the given text. The text only mentions the total net income for FY 0 (19-0) and the revenue for fis.  Fy 9 (08-9) for which the text is referring to. It is unclear from the context whether the reference is to the fis
+Inference Speed: 332.6971 seconds
+
+--- Test Question 10 ---
+Q: How many full-time employees did Medtronic have as of the 2025 report?
+Expected A: As of the 2025 report, Medtronic has over 95,000 full-time employees.
+Generated A: 100. As of 31 December 5, 60,099 employees. The 401(k) plan is a retirement savings plan offered by MedTronic. It is an employee benefit that allows employees to save for retiremen t. Employees can contribute to the plan and receive a matching contribution from the company. This plan has a 75% match rate, meaning that 80% of an eligible
+Inference Speed: 332.3810 seconds
+
+--- Benchmark Summary ---
+Average Inference Speed: 328.8197 seconds
+==================================================
+
+
+==================================================
+  STARTING FINE-TUNING PROCESS (QLoRA)
+==================================================
+Compute Setup: CPU
+Model: TinyLlama/TinyLlama-1.1B-Chat-v1.0
+Learning Rate: 0.0002
+Batch Size: 2
+Number of Epochs: 3
+
+Trainable Parameters:
+
+Starting training...
