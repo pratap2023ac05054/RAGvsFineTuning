@@ -6,8 +6,8 @@ import faiss
 import pickle
 import os
 import torch
+from transformers import AutoModelForCausalLM, AutoTokenizer
 from sentence_transformers import SentenceTransformer
-from transformers import AutoTokenizer, AutoModelForCausalLM
 
 from response_generator import ResponseGenerator
 from guardrails import validate_query
@@ -18,10 +18,10 @@ FAISS_INDEX_PATH = "faiss_index.bin"
 BM25_INDEX_PATH = "bm25_index.pkl"
 CHUNK_DATA_PATH = "chunk_data.pkl"
 EMBED_MODEL_NAME = "all-MiniLM-L6-v2"
-BASE_GENERATOR_MODEL = "openai-community/gpt2-medium"
+BASE_GENERATOR_MODEL = "TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF"
 
-# Path for the fine-tuned model
-FINETUNED_MODEL_PATH = "./gpt2-medium-finetuned"
+# Paths for the fine-tuned model
+FINETUNED_MODEL_PATH = "./tinyllama-finetuned-merged"
 
 # --- Caching ---
 @st.cache_resource
@@ -30,11 +30,6 @@ def load_components():
     print("Loading application components...")
     components = {}
     try:
-        # Determine device
-        device = "cuda" if torch.cuda.is_available() else "cpu"
-        components["device"] = device
-        print(f"Using device: {device}")
-
         # Load RAG components
         components["embed_model"] = SentenceTransformer(EMBED_MODEL_NAME)
         components["faiss_index"] = faiss.read_index(FAISS_INDEX_PATH)
@@ -45,12 +40,15 @@ def load_components():
         components["base_generator"] = ResponseGenerator(model_name=BASE_GENERATOR_MODEL)
         print("RAG components loaded successfully.")
 
-        # Load the fine-tuned model directly
-        if os.path.isdir(FINETUNED_MODEL_PATH):
+        # Load the fine-tuned model directly from transformers
+        if os.path.exists(FINETUNED_MODEL_PATH):
             print(f"Loading fine-tuned model from {FINETUNED_MODEL_PATH}...")
+            device = "cpu"
             tuned_model = AutoModelForCausalLM.from_pretrained(FINETUNED_MODEL_PATH).to(device)
             tuned_tokenizer = AutoTokenizer.from_pretrained(FINETUNED_MODEL_PATH)
-            
+            if tuned_tokenizer.pad_token is None:
+                tuned_tokenizer.pad_token = tuned_tokenizer.eos_token
+
             components["tuned_model"] = tuned_model
             components["tuned_tokenizer"] = tuned_tokenizer
             print("Fine-tuned model loaded successfully.")
@@ -67,31 +65,59 @@ def load_components():
         st.error(f"An unexpected error occurred while loading components: {e}")
         return None
 
-def generate_from_finetuned(model, tokenizer, query: str, device: str):
+def generate_from_finetuned(model, tokenizer, query: str):
     """Generates a response from the fine-tuned transformers model."""
     start_time = time.time()
+    device = "cpu"
 
-    prompt = f"Question: {query}\n\nAnswer:"
+    prompt = (
+        f"<|system|>\nYou are a helpful assistant.</s>\n"
+        f"<|user|>\n{query}</s>\n"
+        f"<|assistant|>"
+    )
     
     inputs = tokenizer(prompt, return_tensors="pt").to(device)
 
-    output_sequences = model.generate(
-        input_ids=inputs["input_ids"],
-        attention_mask=inputs["attention_mask"],
-        max_new_tokens=250,
-        temperature=0.7,
-        top_p=0.9,
-        do_sample=True,
-        pad_token_id=tokenizer.eos_token_id
-    )
+    # Generate the response
+    with torch.no_grad():
+        # Add parameters to get token scores
+        outputs = model.generate(
+            **inputs, 
+            max_new_tokens=250, 
+            temperature=0.7, 
+            top_p=0.9,
+            do_sample=True,
+            output_scores=True, # Request scores
+            return_dict_in_generate=True # Return a dictionary
+        )
+    
+    # Decode the generated text
+    answer = tokenizer.decode(outputs.sequences[0][inputs['input_ids'].shape[1]:], skip_special_tokens=True).strip()
+    
+    # --- Calculate Confidence Score ---
+    # Get the scores for each generated token
+    scores = outputs.scores
+    # Get the IDs of the generated tokens
+    generated_ids = outputs.sequences[0][inputs['input_ids'].shape[1]:]
+    
+    # Calculate the average probability of the generated sequence
+    token_probs = []
+    for i, score in enumerate(scores):
+        # Get the probability distribution for the current token
+        prob_dist = torch.softmax(score, dim=-1)
+        # Get the probability of the token that was actually chosen
+        token_prob = prob_dist[0, generated_ids[i]].item()
+        token_probs.append(token_prob)
 
-    generated_text = tokenizer.decode(output_sequences[0], skip_special_tokens=True)
-    answer = generated_text.replace(prompt, "").strip()
+    # The confidence is the average probability
+    confidence = sum(token_probs) / len(token_probs) if token_probs else 0.0
+    # --- End of Confidence Calculation ---
 
     end_time = time.time()
     inference_time = end_time - start_time
     
-    return answer, inference_time, None
+    # Return the calculated confidence score instead of None
+    return answer, inference_time, confidence
 
 def display_results(answer, method, response_time, confidence_score="N/A", confidence_label="Score"):
     """Displays the generated answer and performance metrics."""
@@ -166,9 +192,9 @@ if components:
                         answer, response_time, confidence = generate_from_finetuned(
                             components["tuned_model"],
                             components["tuned_tokenizer"],
-                            query,
-                            components["device"]
+                            query
                         )
-                        display_results(answer, "Fine-Tuned", response_time, confidence_score="N/A", confidence_label="Confidence Score")
+                        # Use the 'confidence' variable and format it
+                        display_results(answer, "Fine-Tuned", response_time, confidence_score=f"{confidence:.4f}", confidence_label="Avg. Token Prob.")
 else:
     st.error("Application components could not be loaded. Please check the terminal for errors.")

@@ -16,10 +16,10 @@ from datasets import Dataset
 from peft import LoraConfig, get_peft_model, PeftModel
 
 # --- Configuration & Hyperparameters ---
-BASE_MODEL = "openai-community/gpt2-medium"
+BASE_MODEL = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
 DATASET_PATH = "qapairs/medtronic_qa_training_data.json"
-ADAPTER_OUTPUT_DIR = "./gpt2-medium-finetuned-adapter"
-FINETUNED_MODEL_PATH = "./gpt2-medium-finetuned" # Directory to save the final merged model
+OUTPUT_DIR = "./tinyllama-finetuned-adapter-cpu"
+MERGED_MODEL_DIR = "./tinyllama-finetuned-merged" 
 
 # Path to save generated Q&A pairs for the app
 GENERATED_QA_OUTPUT_PATH = "generated_qa.pkl"
@@ -30,7 +30,7 @@ BATCH_SIZE = 2
 NUM_EPOCHS = 10
 
 # --- Logging Setup ---
-LOG_FILE = "training_log_gpt2_medium.txt"
+LOG_FILE = "training_log_tinyllama_cpu.txt"
 
 def log_message(message):
     """Logs a message to both the console and a log file."""
@@ -58,24 +58,21 @@ def load_and_prepare_data():
 def generate_response(model, tokenizer, question, device):
     """Generates a response from a transformers model."""
     start_time = time.time()
-    
-    # Simple Q&A prompt format
-    prompt = f"Question: {question}\n\nAnswer:"
+
+    prompt = (
+        f"<|system|>\nYou are a helpful assistant.</s>\n"
+        f"<|user|>\n{question}</s>\n"
+        f"<|assistant|>"
+    )
     
     inputs = tokenizer(prompt, return_tensors="pt").to(device)
-
-    output_sequences = model.generate(
-        input_ids=inputs['input_ids'],
-        attention_mask=inputs['attention_mask'],
-        max_new_tokens=100,
-        temperature=0.7,
-        do_sample=True,
-        pad_token_id=tokenizer.eos_token_id
-    )
-
-    generated_text = tokenizer.decode(output_sequences[0], skip_special_tokens=True)
-    answer = generated_text.replace(prompt, "").strip()
-
+    
+    # Generate the response
+    with torch.no_grad():
+        outputs = model.generate(**inputs, max_new_tokens=100, temperature=0.7, do_sample=True)
+    
+    answer = tokenizer.decode(outputs[0][inputs['input_ids'].shape[1]:], skip_special_tokens=True).strip()
+    
     end_time = time.time()
     inference_speed = end_time - start_time
     return answer, inference_speed
@@ -86,9 +83,11 @@ def benchmark_model(model_path, test_questions, model_name="Model"):
     log_message(f"  BENCHMARKING MODEL: {model_name}")
     log_message("="*50)
 
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = "cpu"
     model = AutoModelForCausalLM.from_pretrained(model_path).to(device)
     tokenizer = AutoTokenizer.from_pretrained(model_path)
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token
 
     total_inference_time = 0
     generated_qa_pairs = {}
@@ -99,7 +98,6 @@ def benchmark_model(model_path, test_questions, model_name="Model"):
 
         generated_answer, inference_speed = generate_response(model, tokenizer, question, device)
         total_inference_time += inference_speed
-
         generated_qa_pairs[question] = generated_answer
 
         log_message(f"\n--- Test Question {i+1} ---")
@@ -116,22 +114,21 @@ def benchmark_model(model_path, test_questions, model_name="Model"):
     return generated_qa_pairs
 
 def fine_tune(train_data):
-    """Fine-tunes the gpt2-medium model using LoRA."""
+    """Fine-tunes the TinyLlama model using LoRA on the CPU."""
     log_message("\n" + "="*50)
-    log_message("  STARTING FINE-TUNING PROCESS (LoRA)")
+    log_message("  STARTING CPU FINE-TUNING PROCESS (LoRA)")
     log_message("="*50)
 
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = "cpu"
     tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
     model = AutoModelForCausalLM.from_pretrained(BASE_MODEL).to(device)
 
-    # LoRA config targeted for GPT-2's attention mechanism
     lora_config = LoraConfig(
         r=16, lora_alpha=32,
-        target_modules=["c_attn"],
+        target_modules=["q_proj", "k_proj", "v_proj", "o_proj"],
         lora_dropout=0.05, bias="none", task_type="CAUSAL_LM"
     )
 
@@ -140,21 +137,19 @@ def fine_tune(train_data):
 
     dataset = Dataset.from_list(train_data)
     def preprocess_function(examples):
-        # Format the text with a clear separator and an end-of-sequence token
         formatted_texts = [
-            f"Question: {q}\n\nAnswer: {a}{tokenizer.eos_token}"
+            f"<|system|>\nYou are a helpful assistant.</s>\n<|user|>\n{q}</s>\n<|assistant|>\n{a}"
             for q, a in zip(examples["question"], examples["answer"])
         ]
-        return tokenizer(formatted_texts, truncation=True, max_length=512, padding="max_length")
+        return tokenizer(formatted_texts, truncation=True, max_length=512)
 
     tokenized_dataset = dataset.map(preprocess_function, batched=True, remove_columns=dataset.column_names)
 
     training_args = TrainingArguments(
-        output_dir=ADAPTER_OUTPUT_DIR, num_train_epochs=NUM_EPOCHS,
+        output_dir=OUTPUT_DIR, num_train_epochs=NUM_EPOCHS,
         per_device_train_batch_size=BATCH_SIZE, gradient_accumulation_steps=4,
-        learning_rate=LEARNING_RATE, logging_dir=f"{ADAPTER_OUTPUT_DIR}/logs",
+        learning_rate=LEARNING_RATE, logging_dir=f"{OUTPUT_DIR}/logs",
         logging_steps=10, save_steps=50, optim="adamw_torch",
-        use_cpu=True if device == "cpu" else False, # Ensure Hugging Face Trainer uses CPU if needed
     )
 
     trainer = Trainer(
@@ -165,9 +160,9 @@ def fine_tune(train_data):
     log_message("\nStarting training...")
     trainer.train()
 
-    log_message(f"Saving fine-tuned adapter to {ADAPTER_OUTPUT_DIR}")
-    trainer.save_model(ADAPTER_OUTPUT_DIR)
-    tokenizer.save_pretrained(ADAPTER_OUTPUT_DIR)
+    log_message(f"Saving fine-tuned adapter to {OUTPUT_DIR}")
+    trainer.save_model(OUTPUT_DIR)
+    tokenizer.save_pretrained(OUTPUT_DIR)
     log_message("Fine-tuning complete!")
 
 def main():
@@ -182,30 +177,27 @@ def main():
     # --- Fine-Tuning ---
     fine_tune(train_data)
 
-    # --- Merge and Save the Final Model ---
+    # --- Merge and Save Model ---
     log_message("\n" + "="*50)
-    log_message("  MERGING ADAPTER AND SAVING FINAL MODEL")
+    log_message("  MERGING AND SAVING MODEL")
     log_message("="*50)
-    
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    log_message(f"\nLoading base model ({BASE_MODEL}) on {device} to merge adapter...")
+
+    device = "cpu"
+    log_message("\nLoading base model to apply fine-tuned adapter...")
     base_model = AutoModelForCausalLM.from_pretrained(BASE_MODEL).to(device)
-    
-    # Load the LoRA adapter
-    peft_model = PeftModel.from_pretrained(base_model, ADAPTER_OUTPUT_DIR)
-    
+    peft_model = PeftModel.from_pretrained(base_model, OUTPUT_DIR)
     log_message("Merging adapter with the base model...")
     merged_model = peft_model.merge_and_unload()
-    
-    log_message(f"Saving final merged model to {FINETUNED_MODEL_PATH}...")
-    merged_model.save_pretrained(FINETUNED_MODEL_PATH)
-    tokenizer = AutoTokenizer.from_pretrained(ADAPTER_OUTPUT_DIR)
-    tokenizer.save_pretrained(FINETUNED_MODEL_PATH)
-    log_message("Model merged and saved successfully.")
+
+    log_message(f"Saving merged model to {MERGED_MODEL_DIR}...")
+    merged_model.save_pretrained(MERGED_MODEL_DIR)
+    tokenizer = AutoTokenizer.from_pretrained(OUTPUT_DIR)
+    tokenizer.save_pretrained(MERGED_MODEL_DIR)
+    log_message("Model merged and saved.")
 
     # --- Post-Fine-Tuning Evaluation ---
     generated_qa = benchmark_model(
-        model_path=FINETUNED_MODEL_PATH,
+        model_path=MERGED_MODEL_DIR,
         test_questions=test_data,
         model_name=f"Fine-Tuned {BASE_MODEL}"
     )
