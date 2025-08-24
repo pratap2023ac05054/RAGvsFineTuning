@@ -20,5 +20,5 @@ pyarrow
 transformers==4.36.2
 ctransformers>=0.2.27
 adapter-transformers
-huggingface_hub
+llama_cpp
 
