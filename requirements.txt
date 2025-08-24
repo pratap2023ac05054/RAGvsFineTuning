@@ -20,5 +20,4 @@ pyarrow
 transformers==4.36.2
 ctransformers>=0.2.27
 adapter-transformers
-llama_cpp
-
+llama_cpp_python 
